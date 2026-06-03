@@ -12,9 +12,14 @@ Correctness:
 	•	max coefficient absolute difference: 4.12509e-06
 	•	parity status: close
 Performance:
-	•	Python+Rust median fit time: 1.43728
-	•	R unmarked median fit time: 0.517
-	•	speed ratio R/Python: 0.359707
+	•	Python full fit median time: 0.0612132
+	•	R full fit median time: 0.537
+	•	speed ratio R/Python: 8.77262
+	•	Python optimizer method: BFGS
+	•	Python function evaluations: 96
+	•	Python optimizer iterations: 12
+	•	Python optimizer message: Optimization terminated successfully.
+	•	Python direct likelihood median time: 0.61975 ms (619.75 µs)
 Environment:
 	•	OS: macOS-26.5.1-arm64-arm-64bit-Mach-O
 	•	CPU if available: arm
@@ -25,3 +30,4 @@ Environment:
 Notes:
 	•	This is a simple end-to-end fit benchmark, not a comprehensive benchmark.
 	•	Optimizer implementations and convergence paths may differ.
+	•	Bottleneck appears dominated by optimizer likelihood calls: nfev × direct likelihood median ≈ 0.0595s (97.2% of median fit time).

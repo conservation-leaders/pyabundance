@@ -1,11 +1,11 @@
 {
   "status": "completed",
   "seconds": [
-    0.06280916699961381,
-    0.06121316700046009,
-    0.06108008299997891
+    1.4481736669999918,
+    1.4570190419999562,
+    1.4715293340000244
   ],
-  "median_seconds": 0.06121316700046009,
+  "median_seconds": 1.4570190419999562,
   "logLik": -1351.3064334037622,
   "params": [
     0.16932200691111493,
@@ -15,13 +15,10 @@
     0.5576076670497169
   ],
   "success": true,
-  "method": "BFGS",
-  "nfev": 96,
-  "nit": 12,
   "message": "Optimization terminated successfully.",
   "python_version": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 21.0.0 (clang-2100.0.123.102)]",
-  "pyabundance_version": "0.1.1",
-  "rust_package_version": "0.1.1",
+  "pyabundance_version": "0.1.0",
+  "rust_package_version": "0.1.0",
   "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
   "machine": "arm64",
   "processor": "arm",

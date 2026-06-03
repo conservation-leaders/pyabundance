@@ -20,6 +20,9 @@ class PCountResult:
     mixture: Literal["poisson"]
     X: NDArray[np.float64]
     W: NDArray[np.float64]
+    method: str
+    nfev: int | None
+    nit: int | None
 
     @property
     def beta(self) -> NDArray[np.float64]:
@@ -47,6 +50,9 @@ class PCountResult:
         lines = [
             "PCountResult(mixture='poisson')",
             f"success: {self.success}",
+            f"method: {self.method}",
+            f"function evaluations: {self.nfev}",
+            f"iterations: {self.nit}",
             f"message: {self.message}",
             f"logLik: {self.loglik:.6g}",
             f"AIC: {self.aic:.6g}",

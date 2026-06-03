@@ -10,5 +10,5 @@ except Exception:  # pragma: no cover - extension may be absent before build
     _rust_version = "unknown"
 
 __all__ = ["PCountResult", "pcount", "simulate_pcount"]
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __rust_version__ = _rust_version

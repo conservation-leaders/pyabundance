@@ -81,10 +81,11 @@ def pcount(
     if se:
         raise NotImplementedError("standard errors are not implemented in v0.1")
     y_arr, x_arr, w_arr, start_arr = validate_pcount_inputs(y, X, W, K, start)
+    problem = _core.PCountPoissonProblem(y_arr, x_arr, w_arr, int(K))
 
     def objective(theta: NDArray[np.float64]) -> float:
         theta_arr = np.ascontiguousarray(theta, dtype=np.float64)
-        loglik = _core.pcount_poisson_loglik(y_arr, x_arr, w_arr, theta_arr, int(K))
+        loglik = problem.loglik(theta_arr)
         if not np.isfinite(loglik):
             return np.inf
         return -float(loglik)
@@ -107,4 +108,7 @@ def pcount(
         mixture=mixture,
         X=x_arr,
         W=w_arr,
+        method=method,
+        nfev=int(opt.nfev) if getattr(opt, "nfev", None) is not None else None,
+        nit=int(opt.nit) if getattr(opt, "nit", None) is not None else None,
     )

@@ -2,13 +2,13 @@
   "owner": "hud",
   "pid": 8914,
   "cwd": "/Users/conservationleaders/Developer/pyabundance",
-  "heartbeat_at": "2026-06-03T07:30:44.377Z",
+  "heartbeat_at": "2026-06-03T07:46:03.389Z",
   "cooldown_ms": 5000,
-  "jitter_ms": 97,
-  "skip_count": 2027,
+  "jitter_ms": 48,
+  "skip_count": 2176,
   "last_status": "skipped",
   "last_reason": "rate_limited",
-  "last_spawn_at": "2026-06-03T07:30:42.368Z",
-  "last_skip_at": "2026-06-03T07:30:44.377Z",
-  "next_allowed_at": "2026-06-03T07:30:47.465Z"
+  "last_spawn_at": "2026-06-03T07:45:58.369Z",
+  "last_skip_at": "2026-06-03T07:46:03.389Z",
+  "next_allowed_at": "2026-06-03T07:46:03.417Z"
 }
