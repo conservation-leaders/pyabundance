@@ -1,0 +1,8 @@
+cff-version: 1.2.0
+message: "If you use pyabundance, please cite it."
+title: "pyabundance"
+version: "0.1.0"
+license: Apache-2.0
+date-released: 2026-06-03
+authors:
+  - name: "pyabundance contributors"

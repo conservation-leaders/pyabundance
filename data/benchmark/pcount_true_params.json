@@ -1,0 +1,21 @@
+{
+  "seed": 20260603,
+  "n_sites": 500,
+  "n_visits": 3,
+  "K": 60,
+  "beta": [
+    0.2,
+    0.6
+  ],
+  "detection_logits": [
+    -0.8,
+    -0.2,
+    0.4
+  ],
+  "detection_probabilities": [
+    0.31002551887238755,
+    0.4501660026875221,
+    0.598687660112452
+  ],
+  "max_observed_count": 8
+}

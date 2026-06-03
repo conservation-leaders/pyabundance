@@ -1,0 +1,11 @@
+/target/
+/.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.so
+*.dylib
+*.dll
+.DS_Store

@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: dtolnay/rust-toolchain@1.83
+        with:
+          components: rustfmt, clippy
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install maturin numpy scipy pandas pytest pytest-benchmark ruff mypy
+      - name: Rust fmt check
+        run: cargo fmt --all -- --check
+      - name: Rust tests
+        run: cargo test
+      - name: Rust clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Build extension
+        run: maturin develop
+      - name: Python tests
+        run: pytest -q

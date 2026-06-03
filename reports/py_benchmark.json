@@ -1,0 +1,31 @@
+{
+  "status": "completed",
+  "seconds": [
+    1.4372807919999104,
+    1.435487041999977,
+    1.44194791599989
+  ],
+  "median_seconds": 1.4372807919999104,
+  "logLik": -1351.3064334037622,
+  "params": [
+    0.16932200691111493,
+    0.6434355276093844,
+    -0.7982704891360907,
+    -0.07723376228425628,
+    0.5576076670497169
+  ],
+  "success": true,
+  "message": "Optimization terminated successfully.",
+  "python_version": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "pyabundance_version": "0.1.0",
+  "rust_package_version": "0.1.0",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "processor": "arm",
+  "dataset": {
+    "n_sites": 500,
+    "n_visits": 3,
+    "K": 60,
+    "repetitions": 3
+  }
+}

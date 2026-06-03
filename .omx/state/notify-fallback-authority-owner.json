@@ -1,0 +1,14 @@
+{
+  "owner": "hud",
+  "pid": 8914,
+  "cwd": "/Users/conservationleaders/Developer/pyabundance",
+  "heartbeat_at": "2026-06-03T07:30:33.299Z",
+  "cooldown_ms": 5000,
+  "jitter_ms": 100,
+  "skip_count": 2018,
+  "last_status": "skipped",
+  "last_reason": "rate_limited",
+  "last_spawn_at": "2026-06-03T07:30:30.301Z",
+  "last_skip_at": "2026-06-03T07:30:33.299Z",
+  "next_allowed_at": "2026-06-03T07:30:35.401Z"
+}
