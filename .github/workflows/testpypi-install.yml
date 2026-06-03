@@ -1,0 +1,41 @@
+name: Install from TestPyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "pyabundance version to install from TestPyPI"
+        required: true
+        default: "1.0.0rc1"
+
+jobs:
+  install-testpypi:
+    name: install TestPyPI (${{ matrix.label }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            label: linux-x86_64
+          - os: macos-13
+            label: macos-x86_64
+          - os: macos-latest
+            label: macos-arm64
+          - os: windows-latest
+            label: windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install from TestPyPI
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install \
+            --index-url https://test.pypi.org/simple/ \
+            --extra-index-url https://pypi.org/simple/ \
+            "pyabundance==${{ github.event.inputs.version }}"
+      - name: Smoke test installed package
+        run: python scripts/smoke_test_installed.py --expected-version "${{ github.event.inputs.version }}"

@@ -1,0 +1,28 @@
+{
+  "status": "completed",
+  "repetitions": 1000,
+  "warmups": 20,
+  "theta_source": "fitted",
+  "theta": [
+    0.2906998066542672,
+    0.5056986994438573,
+    -0.7065327034619705,
+    -0.20241078766454892,
+    0.4673331487499947,
+    -1.2167261667973384
+  ],
+  "logLik": -1211.0507876808313,
+  "median_seconds": 0.0015003125,
+  "median_nanoseconds": 1500312.5,
+  "median_microseconds": 1500.3125,
+  "median_milliseconds": 1.5003125,
+  "python_version": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "pyabundance_version": "0.7.0",
+  "rust_package_version": "0.7.0",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "dataset": {
+    "n_sites": 500,
+    "n_visits": 3,
+    "K": 100
+  }
+}

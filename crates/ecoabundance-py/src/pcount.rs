@@ -73,6 +73,16 @@ impl PyPCountPoissonProblem {
         py.allow_threads(|| self.problem.loglik(&theta_vec))
             .map_err(value_error)
     }
+    pub fn posterior_abundance(
+        &self,
+        py: Python<'_>,
+        theta: PyReadonlyArray1<'_, f64>,
+    ) -> PyResult<Vec<Vec<f64>>> {
+        let theta_view = theta.as_array();
+        let theta_vec: Vec<f64> = theta_view.iter().copied().collect();
+        py.allow_threads(|| self.problem.posterior_abundance(&theta_vec))
+            .map_err(value_error)
+    }
 
     pub fn predict_lambda(
         &self,

@@ -173,6 +173,70 @@ impl PCountPoissonProblem {
         Ok(max_log_term + scaled_sum.ln())
     }
 
+    pub fn posterior_abundance(&self, theta: &[f64]) -> Result<Vec<Vec<f64>>> {
+        let expected_theta = self.dims.n_abundance_params + self.dims.n_detection_params;
+        if theta.len() != expected_theta {
+            return Err(EcoError::Shape(format!(
+                "theta length {} does not match beta+alpha length {expected_theta}",
+                theta.len()
+            )));
+        }
+        let (beta, alpha) = theta.split_at(self.dims.n_abundance_params);
+        let mut out = Vec::with_capacity(self.dims.n_sites);
+        let mut detection_cache = vec![0.0; self.dims.n_visits];
+        for site in 0..self.dims.n_sites {
+            let x_start = site * self.dims.n_abundance_params;
+            let x_site = &self.x[x_start..x_start + self.dims.n_abundance_params];
+            let lambda = dot(x_site, beta).exp();
+            if !lambda.is_finite() || lambda <= 0.0 {
+                return Err(EcoError::InvalidInput(format!(
+                    "lambda must be positive and finite, got {lambda}"
+                )));
+            }
+            let w_start = site * self.dims.n_visits * self.dims.n_detection_params;
+            let w_site =
+                &self.w[w_start..w_start + self.dims.n_visits * self.dims.n_detection_params];
+            for (visit, detection_value) in detection_cache.iter_mut().enumerate() {
+                let start = visit * self.dims.n_detection_params;
+                let end = start + self.dims.n_detection_params;
+                *detection_value = inv_logit(dot(&w_site[start..end], alpha));
+            }
+            let site_obs = &self.sites[site];
+            let mut log_probs = vec![f64::NEG_INFINITY; self.k + 1];
+            for (n, log_prob) in log_probs
+                .iter_mut()
+                .enumerate()
+                .skip(site_obs.max_y)
+                .take(self.k + 1 - site_obs.max_y)
+            {
+                let mut log_term = log_poisson_pmf_precomputed(n, lambda, &self.log_factorials);
+                for (visit, count) in &site_obs.observed {
+                    log_term += log_binomial_pmf_precomputed(
+                        *count,
+                        n,
+                        detection_cache[*visit],
+                        &self.log_factorials,
+                    );
+                }
+                *log_prob = log_term;
+            }
+            let normalizer = log_sum_exp(&log_probs);
+            out.push(
+                log_probs
+                    .iter()
+                    .map(|value| {
+                        if value.is_finite() {
+                            (value - normalizer).exp()
+                        } else {
+                            0.0
+                        }
+                    })
+                    .collect(),
+            );
+        }
+        Ok(out)
+    }
+
     pub fn predict_lambda(&self, beta: &[f64]) -> Result<Vec<f64>> {
         pcount_poisson_predict_lambda(&self.x, beta, self.dims.n_sites)
     }

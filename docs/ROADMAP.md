@@ -9,53 +9,106 @@
 - synthetic benchmark
 - optional R parity benchmark
 
+## v0.1.1
+
+- cached Rust-side Poisson problem object
+- direct likelihood benchmark
+- Python fit profiling
+- optimizer function-evaluation reporting
+- performance notes
+
 ## v0.2
 
-- Negative-binomial N-mixture
-- Zero-inflated Poisson N-mixture
-- improved standard errors
-- parametric bootstrap
-- posterior abundance distribution / ranef-like output
+- negative-binomial N-mixture
+- cached NB problem object
+- NB direct likelihood benchmark
+- optional R unmarked NB parity benchmark
+- benchmark summary
 
 ## v0.3
 
-- Formula interface using formulaic or patsy
-- pandas-first user workflow
-- model selection table
-- AIC comparison helpers
-- prediction intervals via bootstrap
+- zero-inflated Poisson N-mixture
+- cached ZIP problem object
+- ZIP direct likelihood benchmark
+- optional R unmarked ZIP parity benchmark
+- benchmark summary
 
 ## v0.4
 
-- Performance improvements
-- Rayon parallel site-wise likelihood
-- optional analytic gradient or finite-difference improvements
-- larger benchmark suite
+- pandas-first pcount workflow
+- Formulaic-based RHS-only fixed-effect formula interface
+- named abundance and detection coefficients
+- notebook-friendly summaries with model metadata
+- formula overhead benchmark
+- DataFrame/formula examples and documentation
 
 ## v0.5
 
-- Royle-Nichols abundance-induced heterogeneity model
-- occuRN-style workflow, clean-room implementation
+- standard errors
+- confidence intervals
+- covariance diagnostics
+- prediction confidence intervals
+- parametric bootstrap
+- prediction intervals
+- residual diagnostics
+- optional R SE comparison report
 
 ## v0.6
 
-- Multinomial-Poisson model
-- removal/double-observer-style data structures
+- AIC tables
+- compare_models()
+- model-selection and reporting utilities
+- richer prediction/reporting DataFrames
+- exportable summaries
+- bundled synthetic example datasets
+- fuller documentation examples using bundled data
 
 ## v0.7
 
-- Hierarchical distance sampling for binned distances
-- distsamp-style workflow, clean-room implementation
+- posterior abundance distribution / ranef-like output
+- empirical Bayes summaries for latent abundance N
+- site-level abundance interval summaries
+- posterior abundance samples and total abundance summaries
+- posterior predictive checks based on latent abundance
+- optional R ranef-style black-box comparison
 
 ## v0.8
 
-- Open N-mixture / dynamic abundance model
-- pcountOpen-style workflow, clean-room implementation
+- API reference docs
+- tutorial notebooks
+- CI wheel-building with maturin
+- type-checking hardening
+- coverage reporting
+- changelog/release notes
+- package metadata audit
+- publishing test wheels
+- benchmark dashboard or saved benchmark artifacts
+- contributor onboarding docs
 
 ## v0.9
 
-- generalized N-mixture / robust design support
-- gpcount-style workflow, clean-room implementation
+- external-alpha release rehearsal
+- TestPyPI Trusted Publishing workflow and install smoke workflow
+- guarded real-PyPI workflow draft
+- cross-platform wheel matrix validation
+- docs deployment workflow
+- issue and pull-request templates
+- API freeze review
+- dependency/security audit
+- benchmark artifact preservation
+- external alpha reviewer guide
+
+## v1.0 candidate
+
+- run TestPyPI workflow and install from TestPyPI on clean Linux/macOS/Windows
+- invite 2-5 external ecological modelling reviewers
+- freeze public API
+- fix feedback-only issues
+- final R parity refresh
+- final wheel matrix
+- real PyPI release approval
+- GitHub release draft
+- tag v1.0.0-rc1
 
 ## v1.0
 

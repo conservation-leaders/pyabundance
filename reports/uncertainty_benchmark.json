@@ -1,0 +1,47 @@
+{
+  "status": "completed",
+  "fit_without_se_seconds": [
+    0.06159049999405397,
+    0.06182637500023702,
+    0.06117166599869961
+  ],
+  "fit_with_bfgs_seconds": [
+    0.0613342910000938,
+    0.06136883300496265,
+    0.061090792005416006
+  ],
+  "fit_with_finite_difference_seconds": [
+    0.09438950000185287
+  ],
+  "finite_difference_status": "completed",
+  "median_without_se_seconds": 0.06159049999405397,
+  "median_bfgs_seconds": 0.0613342910000938,
+  "finite_difference_seconds": 0.09438950000185287,
+  "bootstrap_nsim": 20,
+  "bootstrap_seconds": 1.0727877499957685,
+  "covariance_method": "finite_difference",
+  "covariance_status": {
+    "available": true,
+    "method": "finite_difference",
+    "finite": true,
+    "symmetric": true,
+    "positive_diagonal": true,
+    "minimum_eigenvalue": 0.000887356482947624,
+    "maximum_eigenvalue": 0.031227765432863666,
+    "condition_number": 35.19190543256192,
+    "pseudo_inverse_used": false,
+    "warnings": []
+  },
+  "n_params": 5,
+  "finite_se_count": 5,
+  "max_finite_se": 0.1396392662280429,
+  "warnings": [],
+  "python_version": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "pyabundance_version": "1.0.0rc1",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "dataset": {
+    "n_sites": 500,
+    "n_visits": 3,
+    "K": 60
+  }
+}

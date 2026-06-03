@@ -1,0 +1,68 @@
+{
+  "status": "completed",
+  "models": {
+    "poisson": {
+      "model": "Poisson",
+      "status": "completed",
+      "posterior_matrix_seconds": 0.0015649170018150471,
+      "summary_seconds": 0.0043781659987871535,
+      "sampling_seconds": 0.011593374998483341,
+      "total_abundance_seconds": 0.011530832998687401,
+      "posterior_matrix_shape": [
+        500,
+        61
+      ],
+      "row_sum_max_error": 3.3306690738754696e-16,
+      "summary_rows": 500,
+      "samples_shape": [
+        1000,
+        500
+      ],
+      "total_mean": 728.114,
+      "total_lower": 705.0,
+      "total_upper": 754.0
+    },
+    "negative_binomial": {
+      "model": "Negative-binomial",
+      "status": "completed",
+      "posterior_matrix_seconds": 0.0041464589958195575,
+      "summary_seconds": 0.006963542000448797,
+      "sampling_seconds": 0.014190167006745469,
+      "total_abundance_seconds": 0.014463125000474975,
+      "posterior_matrix_shape": [
+        500,
+        101
+      ],
+      "row_sum_max_error": 2.220446049250313e-16,
+      "summary_rows": 500,
+      "samples_shape": [
+        1000,
+        500
+      ],
+      "total_mean": 778.204,
+      "total_lower": 751.0,
+      "total_upper": 808.0
+    },
+    "zero_inflated_poisson": {
+      "model": "Zero-inflated Poisson",
+      "status": "completed",
+      "posterior_matrix_seconds": 0.002771042003587354,
+      "summary_seconds": 0.005878500000108033,
+      "sampling_seconds": 0.012775999995938037,
+      "total_abundance_seconds": 0.012822917000448797,
+      "posterior_matrix_shape": [
+        500,
+        101
+      ],
+      "row_sum_max_error": 3.3306690738754696e-16,
+      "summary_rows": 500,
+      "samples_shape": [
+        1000,
+        500
+      ],
+      "total_mean": 587.509,
+      "total_lower": 567.0,
+      "total_upper": 609.0
+    }
+  }
+}

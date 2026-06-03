@@ -1,0 +1,46 @@
+{
+  "status": "completed",
+  "seconds": [
+    0.18927883300057147,
+    0.18966050000017276,
+    0.18935533299736562
+  ],
+  "median_seconds": 0.18935533299736562,
+  "logLik": -1211.0507876808313,
+  "params": [
+    0.2906998066542672,
+    0.5056986994438573,
+    -0.7065327034619705,
+    -0.20241078766454892,
+    0.4673331487499947,
+    -1.2167261667973384
+  ],
+  "beta": [
+    0.2906998066542672,
+    0.5056986994438573
+  ],
+  "detection": [
+    -0.7065327034619705,
+    -0.20241078766454892,
+    0.4673331487499947
+  ],
+  "logit_psi": -1.2167261667973384,
+  "psi": 0.22851309750468027,
+  "success": true,
+  "method": "BFGS",
+  "nfev": 126,
+  "nit": 13,
+  "message": "Optimization terminated successfully.",
+  "python_version": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "pyabundance_version": "0.9.0",
+  "rust_package_version": "0.9.0",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "processor": "arm",
+  "dataset": {
+    "n_sites": 500,
+    "n_visits": 3,
+    "K": 100,
+    "repetitions": 3
+  }
+}

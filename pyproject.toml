@@ -4,24 +4,40 @@ build-backend = "maturin"
 
 [project]
 name = "pyabundance"
-version = "0.1.1"
+version = "1.0.0rc1"
 description = "Clean-room Rust + Python ecological abundance modelling library"
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "Apache-2.0" }
 authors = [{ name = "pyabundance contributors" }]
-keywords = ["ecology", "abundance", "n-mixture", "rust", "python"]
+maintainers = [{ name = "pyabundance maintainers" }]
+keywords = ["ecology", "abundance", "n-mixture", "rust", "python", "pcount"]
 classifiers = [
-  "Development Status :: 2 - Pre-Alpha",
+  "Development Status :: 3 - Alpha",
   "Intended Audience :: Science/Research",
   "License :: OSI Approved :: Apache Software License",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
   "Programming Language :: Rust",
+  "Topic :: Scientific/Engineering",
 ]
-dependencies = ["numpy", "scipy", "pandas"]
+dependencies = ["numpy", "scipy", "pandas", "formulaic"]
+
+[project.urls]
+Homepage = "https://github.com/pyabundance/pyabundance"
+Documentation = "https://github.com/pyabundance/pyabundance#readme"
+Repository = "https://github.com/pyabundance/pyabundance"
+Issues = "https://github.com/pyabundance/pyabundance/issues"
+Changelog = "https://github.com/pyabundance/pyabundance/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
-dev = ["pytest", "pytest-benchmark", "ruff", "mypy", "maturin"]
+test = ["pytest", "pytest-cov"]
+dev = ["pytest", "pytest-cov", "pytest-benchmark", "ruff", "mypy", "maturin"]
+docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
+benchmark = ["pytest-benchmark"]
+release = ["build", "twine", "maturin"]
 
 [tool.maturin]
 manifest-path = "crates/ecoabundance-py/Cargo.toml"
@@ -36,5 +52,35 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+[tool.mypy]
+python_version = "3.11"
+files = ["python/pyabundance"]
+ignore_missing_imports = true
+follow_imports = "silent"
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+check_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = ["pyabundance._core"]
+ignore_errors = true
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+addopts = "--strict-markers"
+
+[tool.coverage.run]
+source = ["python/pyabundance"]
+omit = ["python/pyabundance/_core.pyi"]
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+skip_covered = false
+exclude_lines = [
+  "pragma: no cover",
+  "if TYPE_CHECKING:",
+  "raise NotImplementedError",
+]

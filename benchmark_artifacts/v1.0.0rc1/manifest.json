@@ -1,0 +1,312 @@
+{
+  "version": "1.0.0rc1",
+  "created_at": "2026-06-03T22:02:59.560621+00:00",
+  "files": [
+    {
+      "name": "ALPHA_RELEASE_CHECKLIST.md",
+      "sha256": "961ec9e00755ca1d2cab916ad3ac587f4011bbfa372a31c31c2fa34b94a353c3",
+      "bytes": 895,
+      "status": "READY FOR EXTERNAL ALPHA REVIEW"
+    },
+    {
+      "name": "API_FREEZE_REVIEW.md",
+      "sha256": "522437ca2b33b8bd7020d3ac2f5dd67d55c84cafd06c35f27e7643b5fea9a7d8",
+      "bytes": 900,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "API_FREEZE_REVIEW_1.0.0rc1.md",
+      "sha256": "f0818b60440ff960d25f430e0f3958993204d46f8485d97c2775643676a10634",
+      "bytes": 885,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "BENCHMARK_INDEX_RC1.md",
+      "sha256": "e7a4218f3ad81fb5c08d0effed7e6701bd3de562ab9ed0f34da3af11a3a5e5ce",
+      "bytes": 1509,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "BENCHMARK_RESULTS.md",
+      "sha256": "c7a57f1dfb945cda2bd8c77ce1083707c6a21e33b516678958f3af8e93311238",
+      "bytes": 1251,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "BENCHMARK_RESULTS_NB.md",
+      "sha256": "126c8db6dd69c8b311691ad08b8b4194f396d94415e4a5c5879cc917babc271b",
+      "bytes": 1817,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "BENCHMARK_RESULTS_ZIP.md",
+      "sha256": "623905edd109ae636ae3606fb928dd40a50e83139c032cf8e04a8b2961f6e213",
+      "bytes": 1832,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "BENCHMARK_SUMMARY.md",
+      "sha256": "77e36a1af1c47661978eb32c77c12a002bd18c8daf84042dcc6d392c61b27cb4",
+      "bytes": 407,
+      "status": null
+    },
+    {
+      "name": "CI_WORKFLOWS.md",
+      "sha256": "3bc8f7fc650b8b2aca3d601e1823ff00d095de7a1c28aeca18ed461c3152378f",
+      "bytes": 1441,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "COVERAGE_SUMMARY.md",
+      "sha256": "b5205198f82b41a9583572f4595cddc9a7450f86251351904c528a74361a75a7",
+      "bytes": 567,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "COVERAGE_SUMMARY_RC1.md",
+      "sha256": "7619b4d7e1f1caed1100d2fccef8b25621fe03a8c97d9205112ab769c64343ea",
+      "bytes": 423,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "DEPENDENCY_AUDIT.md",
+      "sha256": "85f60570bf19b35ecce63c0e074392e28f2634aa55c783d9ca238fbd361cc41d",
+      "bytes": 783,
+      "status": "PARTIAL"
+    },
+    {
+      "name": "DEPENDENCY_AUDIT_RC1.md",
+      "sha256": "e014bde2080b8df946fc777332ff242b03ededee9f0428f70fc381c339463a01",
+      "bytes": 690,
+      "status": "PARTIAL"
+    },
+    {
+      "name": "DOCS_STATUS_RC1.md",
+      "sha256": "93ac63c4ee484b3a77fb683aed7ce538567196781c2d26f0e84a36221d95e816",
+      "bytes": 457,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "EXTERNAL_ALPHA_PACKET.md",
+      "sha256": "ccedbc24fbc3f8d4a0ca681058861107f089ff5c8e0847f70480a10cb4ea64a9",
+      "bytes": 614,
+      "status": "READY"
+    },
+    {
+      "name": "FORMULA_OVERHEAD_BENCHMARK.md",
+      "sha256": "7cf773f6b37ad26dcc42aa6a54cacf2ed2748cf62177a14c9597d86dbf42f66e",
+      "bytes": 573,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "PERFORMANCE_NOTES.md",
+      "sha256": "3b6d0bf69e2b31bd454faa71a807c8091b9937604db46c2f2d6f6cb6cf4daa58",
+      "bytes": 2054,
+      "status": null
+    },
+    {
+      "name": "POSTERIOR_ABUNDANCE_BENCHMARK.md",
+      "sha256": "46bbdbe9370ab6ee309c510a1c4a7c65b8e1ef52faedd6dc2a62d57344954772",
+      "bytes": 902,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "RANEF_COMPARISON_R.md",
+      "sha256": "9904995466b83f62bc186c4c6450fe625d6771a0b1304da2ab0945d8e0ca2aec",
+      "bytes": 949,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "RC1_READINESS_AUDIT.md",
+      "sha256": "8a2ac76f3587f2cf49def1040732862f6a0a1bd7f742c21aabcc117ae857dec0",
+      "bytes": 1351,
+      "status": "READY"
+    },
+    {
+      "name": "REPORTING_WORKFLOW.md",
+      "sha256": "bc0fa9fbcd380d652b160196c489173d4cffe993e6db14b9d73bbe557df53e28",
+      "bytes": 723,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "R_PARITY_REFRESH_0.9.md",
+      "sha256": "e481c12e34373a1bd3029a972bad63ac3c7dbc1076af52b2312b930506ce873b",
+      "bytes": 884,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "R_PARITY_REFRESH_RC1.md",
+      "sha256": "eb0d02a19f15d52a8e02556ffd57d2b3c99c32f3765808c5dde0b0db6d969d02",
+      "bytes": 1179,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "SE_COMPARISON_R.md",
+      "sha256": "08636525ed74adb3e0e72b4d65c72b18d2187275a8e2e63b0fbf5e70f11509f4",
+      "bytes": 857,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "TESTPYPI_INSTALL_MATRIX.md",
+      "sha256": "b9390dfd50d6c69ab820368b88fbcb8568863740a79e59129d68352e7d6571c5",
+      "bytes": 665,
+      "status": "NOT RUN"
+    },
+    {
+      "name": "TESTPYPI_REHEARSAL.md",
+      "sha256": "bf1e89bb6413626e00b73014f9359dfb9b892cd3733028f738e133bc698230d2",
+      "bytes": 869,
+      "status": "PARTIAL"
+    },
+    {
+      "name": "TESTPYPI_REHEARSAL_RC1.md",
+      "sha256": "732919aaee73c34996c3490607ade7f1397a7e85d41b572f6091d3fcfea68f09",
+      "bytes": 876,
+      "status": "PARTIAL"
+    },
+    {
+      "name": "UNCERTAINTY_BENCHMARK.md",
+      "sha256": "030a7c7d2cc7bce82f80802aa6cb46ee8067e9567f3b9a9d90698e109b87742c",
+      "bytes": 604,
+      "status": "COMPLETED"
+    },
+    {
+      "name": "WHEEL_MATRIX_STATUS.md",
+      "sha256": "0680fb9744019060adaa0238eeaebd7fa43bcb5ea318694d71080896b89ee8d2",
+      "bytes": 729,
+      "status": "PARTIAL"
+    },
+    {
+      "name": "WHEEL_MATRIX_STATUS_RC1.md",
+      "sha256": "74a2e8a9313bf869637dc67d63b3e2cb57cabd386ccb2cd7052de45f6321f885",
+      "bytes": 752,
+      "status": "PARTIAL"
+    },
+    {
+      "name": "cargo_tree_rc1.txt",
+      "sha256": "49755cca23ad81a62ea0559433c876772482a7acdeeb417df5361a24b992c824",
+      "bytes": 3467,
+      "status": null
+    },
+    {
+      "name": "formula_overhead_benchmark.json",
+      "sha256": "ee89a4b3de5b3ca7a086d90da826a6b825d0f9f0a1549773343e9449af0b99b2",
+      "bytes": 873,
+      "status": null
+    },
+    {
+      "name": "pip_list_rc1.txt",
+      "sha256": "bc59125ac7fac49d126e83c3b503f7629a03def557c5358683b0b0cfcdeada5e",
+      "bytes": 1309,
+      "status": null
+    },
+    {
+      "name": "posterior_abundance_benchmark.json",
+      "sha256": "addd63cd6be65f53bcbdd0c338811b03a0139a84458427db32fee7b1e4efac30",
+      "bytes": 1820,
+      "status": null
+    },
+    {
+      "name": "profile_py_fit.txt",
+      "sha256": "c9847e4f3d68bec1ad6dd649da3e437fe56942c4c6f9de5818cd7994596dbf98",
+      "bytes": 5596,
+      "status": null
+    },
+    {
+      "name": "py_benchmark.json",
+      "sha256": "20be9d7932a57fae7d24eb16130a26d69b657136965e88e8c064b3bda223269f",
+      "bytes": 823,
+      "status": null
+    },
+    {
+      "name": "py_benchmark_v0.1_preflight.json",
+      "sha256": "2b7376ea75f88699a42affdf0b5d65ff87c782fa72b8444cebb48ba9e3efb7d4",
+      "bytes": 764,
+      "status": null
+    },
+    {
+      "name": "py_loglik_benchmark.json",
+      "sha256": "a8517d330f111160219f81fe2f4624cdc86786a971a5e09954af6199ea46fbc5",
+      "bytes": 533,
+      "status": null
+    },
+    {
+      "name": "py_nb_benchmark.json",
+      "sha256": "07529fd39f8aaaa353d6435acb1016f68d04b10721b515f67b02ce0ebb26ca7c",
+      "bytes": 1068,
+      "status": null
+    },
+    {
+      "name": "py_nb_loglik_benchmark.json",
+      "sha256": "6e14336e4e217e1460bf821858392bbeed1fee3420c78f87ad5a97c58dad0420",
+      "bytes": 735,
+      "status": null
+    },
+    {
+      "name": "py_se_comparison.json",
+      "sha256": "7179ebe1a3f530339083e6c0bb862abda7a28cbdc416f065f3fc531ce886fb4d",
+      "bytes": 1058,
+      "status": null
+    },
+    {
+      "name": "py_zip_benchmark.json",
+      "sha256": "d8f2db0118528aa8107fc1b0c334d61242a0d9a31968d181127be5d1581260f9",
+      "bytes": 1075,
+      "status": null
+    },
+    {
+      "name": "py_zip_loglik_benchmark.json",
+      "sha256": "774835e22817cf748f6e54947b03dc68a23939f847e9c516c164c82214ac6504",
+      "bytes": 732,
+      "status": null
+    },
+    {
+      "name": "r_benchmark.json",
+      "sha256": "97c0bed67fe5fb5ee589523a501916776ece7efa03ae0c9977a9e27b92ec7f02",
+      "bytes": 596,
+      "status": null
+    },
+    {
+      "name": "r_benchmark_v0.1_preflight.json",
+      "sha256": "57578293fc11dd334d112ddfd286de5dd4f77db5fca0ee85ab008a4495d2a1ef",
+      "bytes": 596,
+      "status": null
+    },
+    {
+      "name": "r_nb_benchmark.json",
+      "sha256": "3ed3419523651fecfdeeb1119bd83ab27fb3159fb0d7f6a13b5172285fd9dabd",
+      "bytes": 626,
+      "status": null
+    },
+    {
+      "name": "r_ranef_comparison.json",
+      "sha256": "81843b9800b81632147d3dba10cc500f89ac500eb94d9c69ab2f5e459a4a3dd9",
+      "bytes": 13781,
+      "status": null
+    },
+    {
+      "name": "r_se_comparison.json",
+      "sha256": "bb382ad66dec7938b2e9fd7f7c3585da11d8cdaded2ea8b7eb2b51b95cf3198c",
+      "bytes": 592,
+      "status": null
+    },
+    {
+      "name": "r_zip_benchmark.json",
+      "sha256": "521c8dcbc80ed3e7b9b2dc1fd612a1d42a86fb9355722d0ba0fb3d74cea1bbe7",
+      "bytes": 621,
+      "status": null
+    },
+    {
+      "name": "reporting_workflow.json",
+      "sha256": "759e7afc5afe7403158e4a2cce7a9177ff5aab9ba68834def9e1369c69d7d652",
+      "bytes": 1522,
+      "status": null
+    },
+    {
+      "name": "uncertainty_benchmark.json",
+      "sha256": "615ab8ab5cce38a3d212a5f5dfd4d37767e79fc9ad07a534f088432230e84150",
+      "bytes": 1330,
+      "status": null
+    }
+  ]
+}

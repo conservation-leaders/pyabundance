@@ -4,6 +4,9 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "PyO3 bindings exposing pyabundance Rust numerical kernels to Python"
+repository = "https://github.com/pyabundance/pyabundance"
+homepage = "https://github.com/pyabundance/pyabundance"
 
 [lib]
 name = "_core"

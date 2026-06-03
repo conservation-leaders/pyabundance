@@ -4,8 +4,12 @@ version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
+description = "Clean-room Rust numerical core for pyabundance ecological abundance models"
+repository = "https://github.com/pyabundance/pyabundance"
+homepage = "https://github.com/pyabundance/pyabundance"
 
 [dependencies]
+libm = "0.2"
 rand = "0.8"
 rand_distr = "0.4"
 

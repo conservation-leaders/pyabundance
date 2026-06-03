@@ -1,0 +1,30 @@
+{
+  "status": "completed",
+  "matrix_seconds": [
+    0.06123200000001816,
+    0.060858458000438986,
+    0.060945958000957035
+  ],
+  "formula_seconds": [
+    0.06779070799893816,
+    0.06834554200031562,
+    0.0672057500014489
+  ],
+  "matrix_median_seconds": 0.060945958000957035,
+  "formula_median_seconds": 0.06779070799893816,
+  "formula_overhead_seconds": 0.0068447499979811255,
+  "formula_matrix_ratio": 1.1123085143377949,
+  "matrix_logLik": -1351.3064334037622,
+  "formula_logLik": -1351.3064334037622,
+  "absolute_logLik_difference": 0.0,
+  "max_coefficient_absolute_difference": 0.0,
+  "python_version": "3.14.5 (main, May 10 2026, 10:21:34) [Clang 21.0.0 (clang-2100.0.123.102)]",
+  "pyabundance_version": "0.7.0",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "dataset": {
+    "n_sites": 500,
+    "n_visits": 3,
+    "K": 60,
+    "repetitions": 3
+  }
+}

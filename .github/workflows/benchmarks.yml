@@ -1,0 +1,71 @@
+name: Benchmarks
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_r:
+        description: "Run optional R/unmarked comparisons"
+        required: true
+        default: "false"
+        type: choice
+        options: ["false", "true"]
+
+jobs:
+  benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: dtolnay/rust-toolchain@1.83
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev,benchmark]'
+          maturin develop --release
+      - name: Run Python benchmarks
+        run: |
+          python benchmarks/generate_pcount_dataset.py
+          python benchmarks/run_py_benchmark.py
+          python benchmarks/run_py_loglik_benchmark.py
+          python benchmarks/generate_pcount_nb_dataset.py
+          python benchmarks/run_py_nb_benchmark.py
+          python benchmarks/run_py_nb_loglik_benchmark.py
+          python benchmarks/generate_pcount_zip_dataset.py
+          python benchmarks/run_py_zip_benchmark.py
+          python benchmarks/run_py_zip_loglik_benchmark.py
+          python benchmarks/run_formula_overhead_benchmark.py
+          python benchmarks/run_uncertainty_benchmark.py
+          python benchmarks/run_reporting_workflow.py
+          python benchmarks/run_posterior_abundance_benchmark.py
+      - name: Optional R parity benchmarks
+        if: github.event.inputs.run_r == 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y r-base
+          Rscript benchmarks/run_r_unmarked_benchmark.R || true
+          python benchmarks/compare_benchmarks.py || true
+          Rscript benchmarks/run_r_unmarked_nb_benchmark.R || true
+          python benchmarks/compare_nb_benchmarks.py || true
+          Rscript benchmarks/run_r_unmarked_zip_benchmark.R || true
+          python benchmarks/compare_zip_benchmarks.py || true
+          Rscript benchmarks/run_r_unmarked_se_comparison.R || true
+          python benchmarks/compare_se_with_r.py || true
+          Rscript benchmarks/run_r_unmarked_ranef_comparison.R || true
+          python benchmarks/compare_ranef_with_r.py || true
+      - name: Summary and preserve artifacts
+        run: |
+          python benchmarks/compare_benchmark_summary.py || true
+          python scripts/preserve_benchmark_artifacts.py --version 1.0.0rc1 || true
+      - name: Upload benchmark artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-artifacts
+          retention-days: 90
+          path: |
+            reports/*.md
+            reports/*.json
+            reports/*.txt
+            benchmark_artifacts/**
+            coverage.xml

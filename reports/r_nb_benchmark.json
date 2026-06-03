@@ -1,0 +1,13 @@
+{
+  "status": "completed",
+  "seconds": [1.3440000000000001, 1.0900000000000001, 1.0850000000000000],
+  "median_seconds": 1.0900000000000001,
+  "logLik": -1360.8843267013899,
+  "coefficients": [ 0.23567916358669505,  0.56672944712777140, -0.90604164155693634, -0.09325417086188080,  0.41638608627318724,  0.37306631447908939],
+  "coefficient_names": ["lam(Int)", "lam(x)", "p(visitv1)", "p(visitv2)", "p(visitv3)", "alpha(alpha)"],
+  "R_version": "R version 4.6.0 (2026-04-24)",
+  "unmarked_version": "1.5.1",
+  "platform": "aarch64-apple-darwin23",
+  "dataset": {"n_sites": 500, "n_visits": 3, "K": 100, "repetitions": 3}
+}
+

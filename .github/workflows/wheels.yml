@@ -1,0 +1,88 @@
+name: Build and smoke-test wheels
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "Cargo.toml"
+      - "Cargo.lock"
+      - "crates/**"
+      - "python/**"
+      - "scripts/smoke_test_wheel.py"
+      - ".github/workflows/wheels.yml"
+
+jobs:
+  build-wheels:
+    name: build ${{ matrix.target }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64
+            artifact: linux-x86_64
+          - os: macos-13
+            target: x86_64
+            artifact: macos-x86_64
+          - os: macos-latest
+            target: aarch64
+            artifact: macos-arm64
+          - os: windows-latest
+            target: x64
+            artifact: windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build wheel with maturin
+        uses: PyO3/maturin-action@v1
+        with:
+          target: ${{ matrix.target }}
+          args: --release --out dist
+          sccache: 'true'
+          manylinux: auto
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.artifact }}
+          path: dist/*
+
+  smoke-test-wheels:
+    name: smoke ${{ matrix.os }}
+    needs: build-wheels
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: linux-x86_64
+          - os: macos-13
+            artifact: macos-x86_64
+          - os: macos-latest
+            artifact: macos-arm64
+          - os: windows-latest
+            artifact: windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@v4
+        with:
+          name: wheels-${{ matrix.artifact }}
+          path: dist
+      - name: Install and smoke test wheel
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python scripts/smoke_test_wheel.py dist
+      - name: Upload wheel matrix status
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: wheel-status-${{ matrix.artifact }}
+          path: reports/WHEEL_MATRIX_STATUS.md

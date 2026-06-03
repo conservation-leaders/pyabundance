@@ -50,9 +50,9 @@ result <- tryCatch({
   y <- as.matrix(counts[, c("y1", "y2", "y3")])
   n_sites <- nrow(y)
   siteCovs <- data.frame(x = covs$x)
-  visitMat <- matrix(rep(c("v1", "v2", "v3"), each = n_sites), nrow = n_sites, ncol = 3, byrow = FALSE)
-  visitFactor <- matrix(factor(as.vector(visitMat), levels = c("v1", "v2", "v3")), nrow = n_sites, ncol = 3)
-  obsCovs <- list(visit = visitFactor)
+  obsCovs <- data.frame(
+    visit = factor(rep(c("v1", "v2", "v3"), times = n_sites), levels = c("v1", "v2", "v3"))
+  )
   umf <- unmarkedFramePCount(y = y, siteCovs = siteCovs, obsCovs = obsCovs)
   seconds <- c()
   fits <- list()

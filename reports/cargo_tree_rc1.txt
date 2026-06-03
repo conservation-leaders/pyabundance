@@ -1,0 +1,77 @@
+ecoabundance-core v1.0.0-rc.1 (/Users/conservationleaders/Developer/pyabundance/crates/ecoabundance-core)
+├── libm v0.2.16
+├── rand v0.8.6
+│   ├── libc v0.2.186
+│   ├── rand_chacha v0.3.1
+│   │   ├── ppv-lite86 v0.2.21
+│   │   │   └── zerocopy v0.8.50
+│   │   └── rand_core v0.6.4
+│   │       └── getrandom v0.2.17
+│   │           ├── cfg-if v1.0.4
+│   │           └── libc v0.2.186
+│   └── rand_core v0.6.4 (*)
+└── rand_distr v0.4.3
+    ├── num-traits v0.2.19
+    │   └── libm v0.2.16
+    │   [build-dependencies]
+    │   └── autocfg v1.5.1
+    └── rand v0.8.6 (*)
+
+ecoabundance-py v1.0.0-rc.1 (/Users/conservationleaders/Developer/pyabundance/crates/ecoabundance-py)
+├── ecoabundance-core v1.0.0-rc.1 (/Users/conservationleaders/Developer/pyabundance/crates/ecoabundance-core) (*)
+├── numpy v0.23.0
+│   ├── libc v0.2.186
+│   ├── ndarray v0.16.1
+│   │   ├── matrixmultiply v0.3.10
+│   │   │   └── rawpointer v0.2.1
+│   │   │   [build-dependencies]
+│   │   │   └── autocfg v1.5.1
+│   │   ├── num-complex v0.4.6
+│   │   │   └── num-traits v0.2.19 (*)
+│   │   ├── num-integer v0.1.46
+│   │   │   └── num-traits v0.2.19 (*)
+│   │   ├── num-traits v0.2.19 (*)
+│   │   └── rawpointer v0.2.1
+│   ├── num-complex v0.4.6 (*)
+│   ├── num-integer v0.1.46 (*)
+│   ├── num-traits v0.2.19 (*)
+│   ├── pyo3 v0.23.5
+│   │   ├── cfg-if v1.0.4
+│   │   ├── indoc v2.0.7 (proc-macro)
+│   │   │   [build-dependencies]
+│   │   │   └── rustversion v1.0.22 (proc-macro)
+│   │   ├── libc v0.2.186
+│   │   ├── memoffset v0.9.1
+│   │   │   [build-dependencies]
+│   │   │   └── autocfg v1.5.1
+│   │   ├── once_cell v1.21.4
+│   │   ├── pyo3-ffi v0.23.5
+│   │   │   └── libc v0.2.186
+│   │   │   [build-dependencies]
+│   │   │   └── pyo3-build-config v0.23.5
+│   │   │       ├── once_cell v1.21.4
+│   │   │       └── target-lexicon v0.12.16
+│   │   │       [build-dependencies]
+│   │   │       └── target-lexicon v0.12.16
+│   │   ├── pyo3-macros v0.23.5 (proc-macro)
+│   │   │   ├── proc-macro2 v1.0.106
+│   │   │   │   └── unicode-ident v1.0.24
+│   │   │   ├── pyo3-macros-backend v0.23.5
+│   │   │   │   ├── heck v0.5.0
+│   │   │   │   ├── proc-macro2 v1.0.106 (*)
+│   │   │   │   ├── pyo3-build-config v0.23.5 (*)
+│   │   │   │   ├── quote v1.0.45
+│   │   │   │   │   └── proc-macro2 v1.0.106 (*)
+│   │   │   │   └── syn v2.0.117
+│   │   │   │       ├── proc-macro2 v1.0.106 (*)
+│   │   │   │       ├── quote v1.0.45 (*)
+│   │   │   │       └── unicode-ident v1.0.24
+│   │   │   │   [build-dependencies]
+│   │   │   │   └── pyo3-build-config v0.23.5 (*)
+│   │   │   ├── quote v1.0.45 (*)
+│   │   │   └── syn v2.0.117 (*)
+│   │   └── unindent v0.2.4
+│   │   [build-dependencies]
+│   │   └── pyo3-build-config v0.23.5 (*)
+│   └── rustc-hash v2.1.2
+└── pyo3 v0.23.5 (*)

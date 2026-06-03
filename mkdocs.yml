@@ -1,0 +1,40 @@
+site_name: pyabundance
+site_description: Clean-room Rust + Python ecological abundance modelling library
+repo_url: https://github.com/pyabundance/pyabundance
+theme:
+  name: material
+nav:
+  - Home: index.md
+  - Formula API: FORMULA_API.md
+  - Uncertainty: UNCERTAINTY.md
+  - Model Selection & Reporting: MODEL_SELECTION_REPORTING.md
+  - Posterior Abundance: POSTERIOR_ABUNDANCE.md
+  - Limitations: LIMITATIONS.md
+  - Contributor Onboarding: CONTRIBUTOR_ONBOARDING.md
+  - Release:
+      - Release Checklist: release/RELEASE_CHECKLIST.md
+      - TestPyPI Rehearsal: release/TESTPYPI_REHEARSAL.md
+      - PyPI Release Process: release/PYPI_RELEASE_PROCESS.md
+      - Docs Deployment: release/DOCS_DEPLOYMENT.md
+      - API Freeze Review v0.9: release/API_FREEZE_REVIEW_0.9.md
+      - External Alpha Review: release/EXTERNAL_ALPHA_REVIEW.md
+      - v1.0.0rc1 Release Notes: release/RELEASE_NOTES_1.0.0rc1.md
+      - GitHub Release Draft rc1: release/GITHUB_RELEASE_DRAFT_1.0.0rc1.md
+      - API Freeze Review rc1: release/API_FREEZE_REVIEW_1.0.0rc1.md
+      - Reviewer Feedback Template: release/REVIEWER_FEEDBACK_TEMPLATE.md
+      - v0.9.0 Release Notes: release/RELEASE_NOTES_0.9.0.md
+      - v0.8.0 Release Notes: release/RELEASE_NOTES_0.8.0.md
+  - Roadmap: ROADMAP.md
+  - API Reference:
+      - Overview: api/index.md
+      - pcount: api/pcount.md
+      - Results: api/result.md
+      - Formula/Data: api/formula.md
+      - Model Selection: api/model_selection.md
+      - Datasets: api/datasets.md
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [python]

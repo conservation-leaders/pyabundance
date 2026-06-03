@@ -1,0 +1,59 @@
+{
+  "status": "completed",
+  "seconds": {
+    "poisson": 0.028189707998535596,
+    "negative_binomial": 0.13543112500337884,
+    "zero_inflated_poisson": 0.06668558299861616
+  },
+  "aic_table": [
+    {
+      "rank": 1,
+      "model": "poisson",
+      "mixture": "poisson",
+      "n_params": 6,
+      "logLik": -318.79491699568695,
+      "AIC": 649.5898339913739,
+      "delta_AIC": 0.0,
+      "AIC_weight": 0.5508961398920124,
+      "K": 70,
+      "success": true,
+      "nfev": 126,
+      "nit": 12,
+      "abundance_formula": "~ forest + elevation",
+      "detection_formula": "~ visit - 1"
+    },
+    {
+      "rank": 2,
+      "model": "zero_inflated_poisson",
+      "mixture": "zero_inflated_poisson",
+      "n_params": 7,
+      "logLik": -318.62267579412855,
+      "AIC": 651.2453515882571,
+      "delta_AIC": 1.6555175968832145,
+      "AIC_weight": 0.24075684905501293,
+      "K": 100,
+      "success": true,
+      "nfev": 168,
+      "nit": 16,
+      "abundance_formula": "~ forest + elevation",
+      "detection_formula": "~ visit - 1"
+    },
+    {
+      "rank": 3,
+      "model": "negative_binomial",
+      "mixture": "negative_binomial",
+      "n_params": 7,
+      "logLik": -318.76725828126126,
+      "AIC": 651.5345165625225,
+      "delta_AIC": 1.9446825711486326,
+      "AIC_weight": 0.20834701105297473,
+      "K": 100,
+      "success": true,
+      "nfev": 208,
+      "nit": 20,
+      "abundance_formula": "~ forest + elevation",
+      "detection_formula": "~ visit - 1"
+    }
+  ],
+  "best_model": "poisson"
+}

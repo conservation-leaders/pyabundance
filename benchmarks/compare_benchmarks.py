@@ -127,15 +127,13 @@ def main() -> None:
             r_params = r.get("coefficients", [])
             if len(py_params) == len(r_params):
                 max_coef_diff = max(
-                    abs(float(a) - float(b))
-                    for a, b in zip(py_params, r_params, strict=True)
+                    abs(float(a) - float(b)) for a, b in zip(py_params, r_params, strict=True)
                 )
             if py_seconds and r_seconds:
                 speed_ratio = float(r_seconds) / float(py_seconds)
             parity_status = (
                 "close"
-                if abs_loglik_diff < 1.0e-5
-                and (max_coef_diff is None or max_coef_diff < 1.0e-4)
+                if abs_loglik_diff < 1.0e-5 and (max_coef_diff is None or max_coef_diff < 1.0e-4)
                 else "differs"
             )
 
@@ -149,10 +147,10 @@ def main() -> None:
     text = f"""Benchmark Results
 Status: {status}
 Dataset:
-\t•\tn_sites: {fmt(dataset.get('n_sites'))}
-\t•\tn_visits: {fmt(dataset.get('n_visits'))}
-\t•\tK: {fmt(dataset.get('K'))}
-\t•\trepetitions: {fmt(dataset.get('repetitions', 3 if py else None))}
+\t•\tn_sites: {fmt(dataset.get("n_sites"))}
+\t•\tn_visits: {fmt(dataset.get("n_visits"))}
+\t•\tK: {fmt(dataset.get("K"))}
+\t•\trepetitions: {fmt(dataset.get("repetitions", 3 if py else None))}
 Correctness:
 \t•\tPython logLik: {fmt(py_loglik)}
 \t•\tR unmarked logLik: {fmt(r_loglik)}
@@ -170,8 +168,8 @@ Performance:
 \t•\tPython direct likelihood median time: {fmt(direct_loglik_ms)} ms ({fmt(direct_loglik_us)} µs)
 Environment:
 \t•\tOS: {platform.platform()}
-\t•\tCPU if available: {platform.processor() or platform.machine() or 'not available'}
-\t•\tPython: {(py or {}).get('python_version', 'not available')}
+\t•\tCPU if available: {platform.processor() or platform.machine() or "not available"}
+\t•\tPython: {(py or {}).get("python_version", "not available")}
 \t•\tRust: {rust_version()}
 \t•\tR: {r_env}
 \t•\tunmarked: {unmarked_env}
