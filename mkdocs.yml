@@ -27,6 +27,8 @@ nav:
       - Contributing: development/CONTRIBUTING.md
       - Clean-room Policy: development/CLEAN_ROOM_POLICY.md
       - Repository Hygiene: development/REPOSITORY_HYGIENE.md
+      - GitHub Actions: development/GITHUB_ACTIONS.md
+      - GitHub Actions Stabilization: development/GITHUB_ACTIONS_STABILIZATION.md
       - Cleanup Inventory: development/CLEANUP_INVENTORY.md
       - Cleanup Summary: development/REPO_CLEANUP_SUMMARY.md
   - Release:

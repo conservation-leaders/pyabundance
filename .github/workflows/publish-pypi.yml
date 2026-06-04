@@ -7,16 +7,78 @@ on:
         description: "Type publish-to-pypi to confirm this guarded production release"
         required: true
         default: "do-not-publish"
-  push:
-    tags:
-      - "v*"
 
 permissions:
   contents: read
 
 jobs:
+  build-wheels:
+    name: Build PyPI wheel ${{ matrix.artifact }}
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_real_pypi == 'publish-to-pypi'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64
+            manylinux: "2014"
+            artifact: linux-x86_64
+          - os: macos-15-intel
+            target: x86_64
+            manylinux: "off"
+            artifact: macos-x86_64
+          - os: macos-15
+            target: aarch64
+            manylinux: "off"
+            artifact: macos-arm64
+          - os: windows-latest
+            target: x64
+            manylinux: "off"
+            artifact: windows-x86_64
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        if: runner.os != 'Linux'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build wheel with maturin
+        uses: PyO3/maturin-action@v1
+        with:
+          command: build
+          target: ${{ matrix.target }}
+          args: --release --out dist --compatibility pypi
+          manylinux: ${{ matrix.manylinux }}
+      - name: Upload wheel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pypi-wheel-${{ matrix.artifact }}
+          path: dist/*.whl
+
+  build-sdist:
+    name: Build PyPI sdist
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_real_pypi == 'publish-to-pypi'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install maturin
+        run: python -m pip install --upgrade pip maturin
+      - name: Build sdist
+        run: maturin sdist --out dist
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pypi-sdist
+          path: dist/*.tar.gz
+
   publish-pypi:
-    name: Build and publish to real PyPI
+    name: Publish artifacts to real PyPI
+    needs: [build-wheels, build-sdist]
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && github.event.inputs.confirm_real_pypi == 'publish-to-pypi'
     environment: pypi-release
@@ -24,20 +86,19 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: pypi-*
+          path: dist
+          merge-multiple: true
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - uses: dtolnay/rust-toolchain@1.83
-      - name: Install release tools
-        run: python -m pip install --upgrade pip maturin twine
-      - name: Build wheel and sdist
-        run: |
-          rm -rf dist
-          maturin build --release --out dist
-          maturin sdist --out dist
+          cache: pip
       - name: Check distributions
-        run: python -m twine check dist/*
+        run: |
+          python -m pip install --upgrade pip twine
+          python -m twine check dist/*
       - name: Publish to PyPI via Trusted Publishing
         uses: pypa/gh-action-pypi-publish@release/v1
         with:

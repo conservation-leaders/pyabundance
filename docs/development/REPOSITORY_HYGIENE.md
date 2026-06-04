@@ -16,7 +16,7 @@ pyabundance keeps source, tests, docs, workflows, scripts, and benchmark generat
 
 ## Do not track by default
 
-- `dist/`, `build/`, `wheelhouse/`
+- `dist/`, `build/`, `wheelhouse/`, `site/`
 - `target/`
 - `.venv/`, `.venv*/`, `.env/`
 - `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `__pycache__/`
@@ -52,6 +52,53 @@ Optional R black-box comparisons require R and `unmarked`:
 Rscript benchmarks/run_r_unmarked_benchmark.R || true
 python benchmarks/compare_benchmarks.py
 ```
+
+## Rust toolchain policy
+
+The project pins Rust to `1.83.0` for release-candidate builds.
+
+In CI:
+
+- install Rust explicitly before Python editable installs;
+- use exact toolchain version `1.83.0`;
+- install `rustfmt` and `clippy` through the GitHub Actions Rust setup step when those checks are run;
+- run `rustup show`, `rustc --version`, `cargo --version`, `cargo fmt --version`, and `cargo clippy --version` before `pip install -e` in CI;
+- do not rely on maturin to discover or install Rust during pip metadata generation.
+
+`rust-toolchain.toml` pins the toolchain version with `profile = "minimal"` and does not install clippy/rustfmt components implicitly in CI.
+
+Local development:
+
+- developers may use `maturin develop` inside an activated virtual environment;
+- developers may install components manually if needed:
+
+```bash
+rustup component add rustfmt clippy --toolchain 1.83.0
+```
+
+## GitHub Actions install policy
+
+GitHub Actions workflows should not call `maturin develop`. CI, docs, and benchmark jobs use pip editable installs (`python -m pip install -e ...`), wheel/release jobs use `maturin build`, and TestPyPI install jobs install published packages only. See `docs/development/GITHUB_ACTIONS.md`.
+
+## Wheel matrix platforms
+
+pyabundance includes a Rust/PyO3 native extension, so wheels are platform-specific. Release-candidate wheels must be built and smoke-tested for:
+
+- Linux x86_64
+- macOS x86_64
+- macOS arm64
+- Windows x86_64
+
+The package may have been developed on macOS, but Linux and Windows users need platform-specific wheels. Without Linux/Windows wheels, pip may fall back to source builds requiring Rust and native build tooling.
+
+Current runner labels:
+
+- Linux x86_64: `ubuntu-latest`
+- macOS x86_64: `macos-15-intel`
+- macOS arm64: `macos-15`
+- Windows x86_64: `windows-latest`
+
+Do not use `macos-13`.
 
 ## Hygiene check
 
