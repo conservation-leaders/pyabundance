@@ -202,6 +202,11 @@ def _ordered_unique_visits(obs_data: pd.DataFrame, visit_col: str) -> list[Any]:
     return series.dropna().drop_duplicates().tolist()
 
 
+def _is_ordered_categorical(series: pd.Series) -> bool:
+    dtype = getattr(series, "dtype", None)
+    return isinstance(dtype, pd.CategoricalDtype) and dtype.ordered
+
+
 def _resolve_visit_labels(
     *,
     count_cols: list[Any],
@@ -225,18 +230,25 @@ def _resolve_visit_labels(
 
     if visit_col not in obs_data.columns:
         raise ValueError(f"obs_data must contain visit_col {visit_col!r}")
+    visit_series = obs_data[visit_col]
     unique_visits = _ordered_unique_visits(obs_data, visit_col)
     if len(set(unique_visits)) != len(unique_visits):
         raise ValueError("obs_data visit values must be unique after dropping missing labels")
     if set(unique_visits) == set(count_cols) and len(unique_visits) == len(count_cols):
         return list(count_cols), "count_cols", None
-    if len(unique_visits) == len(count_cols):
+    if _is_ordered_categorical(visit_series) and len(unique_visits) == len(count_cols):
         message = f"Inferred visit_labels from obs_data[{visit_col!r}]: {unique_visits!r}."
         return unique_visits, "auto_obs_data", message
+    if _is_ordered_categorical(visit_series):
+        raise ValueError(
+            f"obs_data visit values are {unique_visits}, but count_cols are {count_cols}. "
+            "Pass explicit visit_labels in the order matching count_cols."
+        )
     raise ValueError(
-        f"obs_data visit values are {unique_visits}, but count_cols are {count_cols}. "
-        f"If these represent the same visits, pass visit_labels={unique_visits!r} "
-        "or use visit_labels='auto'."
+        "obs_data visit values differ from count_cols and cannot be safely auto-inferred "
+        f"unless obs_data[{visit_col!r}] is an ordered pandas Categorical. Pass explicit "
+        "visit_labels=[...] in the order matching count_cols, or convert "
+        f"obs_data[{visit_col!r}] to an ordered categorical."
     )
 
 

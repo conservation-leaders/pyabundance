@@ -20,9 +20,14 @@ def test_mallard_validation_scripts_are_not_placeholders():
             "complete.cases",
         ],
         "examples/validation/run_mallard_unmarked.R": [
+            "unmarked::coef",
+            "unmarked::SE",
+            "unmarked::logLik",
+            "stats::AIC",
             "unmarked::pcount",
             "r_poisson_meta.csv",
             "r_nb_coef.csv",
+            "Fallback only for installed unmarked versions",
         ],
         "examples/validation/run_mallard_pyabundance.py": [
             "pcount_df",

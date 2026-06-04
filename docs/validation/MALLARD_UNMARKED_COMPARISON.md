@@ -44,7 +44,7 @@ python examples/validation/compare_mallard_results.py
 
 Complete-case filtering is used so both tools fit the same site and observation rows for required site covariates (`length`, `elev`, `forest`) and observation covariates (`ivel`, `date`). R/unmarked is used only as a black-box comparison target.
 
-The pyabundance script intentionally exercises RC2 conveniences: visit labels are inferred automatically from `obs_data`, `fit.coef_table(as_dataframe=True)` is exported, and `compare_models(..., names=[...])` is used for Python-side model comparison.
+The pyabundance script intentionally exercises RC2 conveniences: visit labels are safely inferred from an ordered categorical `obs_data["visit"]`, `fit.coef_table(as_dataframe=True)` is exported, and `compare_models(..., names=[...])` is used for Python-side model comparison. The R script uses public unmarked accessors first and narrow fallback helpers only for installed-version compatibility.
 
 ## Internal local result example
 

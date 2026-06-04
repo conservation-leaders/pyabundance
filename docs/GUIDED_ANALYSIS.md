@@ -34,7 +34,7 @@ analysis.export_report("abundance_report.md")
 ## What the guided workflow does
 
 - builds count, abundance, and detection matrices once;
-- infers visit labels when observation visits are named differently from count columns;
+- safely infers differing observation visit labels only when the visit column is an ordered pandas Categorical;
 - resolves `K="auto"` once before fitting;
 - fits candidate Poisson, negative-binomial, and zero-inflated Poisson models;
 - compares successful fits by AIC;
@@ -43,6 +43,10 @@ analysis.export_report("abundance_report.md")
 - exports concise markdown reports.
 
 `explain()` is rule-based text, not AI-generated interpretation. It reports the lowest-AIC model, flags overdispersion or ZIP identifiability cautions when relevant, and reminds users that posterior abundance summaries condition on fitted parameters.
+
+## Visit label safety
+
+When `obs_data` is provided, `visit_labels="auto"` is conservative. If observation visit labels match `count_cols`, count columns define the order. If observation visit labels differ from `count_cols`, auto-inference requires `obs_data[visit_col]` to be an ordered pandas Categorical. Otherwise pass explicit `visit_labels` in the order matching `count_cols`. This avoids silently pairing count columns with observation covariates in the wrong visit order.
 
 ## Escape hatches
 

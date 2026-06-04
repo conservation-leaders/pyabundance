@@ -90,6 +90,7 @@ def load_example_pcount(
         for visit_label in visit_labels:
             obs_rows.append({"site_id": site, "visit": visit_label})
     obs_data = pd.DataFrame(obs_rows)
+    obs_data["visit"] = pd.Categorical(obs_data["visit"], categories=visit_labels, ordered=True)
     return ExamplePCountData(
         name=name,
         site_data=site_data,

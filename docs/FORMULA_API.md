@@ -50,7 +50,9 @@ fit = pcount_df(
 
 `obs_data` must contain exactly one row per site × visit. Rows may be out of order; pyabundance sorts
 them internally to match the site order in `site_data` and the visit order in `count_cols` or
-`visit_labels`.
+`visit_labels`. If `obs_data` visit labels differ from `count_cols`, `visit_labels="auto"` is safe
+only when `obs_data[visit_col]` is an ordered pandas Categorical. Otherwise pass explicit
+`visit_labels` in the order matching `count_cols`.
 
 ## ZIP example
 

@@ -39,15 +39,29 @@ obs_covs <- list(
 umf <- unmarked::unmarkedFramePCount(y = y, siteCovs = site_covs, obsCovs = obs_covs)
 
 safe_loglik <- function(fit) {
-  value <- tryCatch(stats::logLik(fit), error = function(e) numeric(0))
+  value <- tryCatch(unmarked::logLik(fit), error = function(e) numeric(0))
   if (length(value) == 0 || is.na(value[1])) {
+    # Fallback only for installed unmarked versions where the public accessor is unavailable.
+    # Do not use this to inspect or port implementation details.
     -as.numeric(methods::slot(fit, "negLogLike"))
   } else {
     as.numeric(value)
   }
 }
 
-safe_coef <- function(fit) {
+parameter_block <- function(parameter) {
+  if (startsWith(parameter, "lam(")) {
+    "abundance"
+  } else if (startsWith(parameter, "p(")) {
+    "detection"
+  } else {
+    "extra"
+  }
+}
+
+fallback_coef <- function(fit) {
+  # Fallback only for installed unmarked versions where the public accessor is unavailable.
+  # Do not use this to inspect or port implementation details.
   estimates <- methods::slot(methods::slot(fit, "estimates"), "estimates")
   rows <- list()
   for (block in names(estimates)) {
@@ -65,15 +79,33 @@ safe_coef <- function(fit) {
   do.call(rbind, rows)
 }
 
+safe_coef <- function(fit) {
+  coef_values <- tryCatch(unmarked::coef(fit), error = function(e) numeric(0))
+  if (length(coef_values) == 0) {
+    return(fallback_coef(fit))
+  }
+  se_values <- tryCatch(unmarked::SE(fit), error = function(e) numeric(0))
+  if (length(se_values) == 0) {
+    cov_mat <- tryCatch(unmarked::vcov(fit), error = function(e) NULL)
+    if (is.null(cov_mat)) {
+      se_values <- rep(NA_real_, length(coef_values))
+    } else {
+      se_values <- sqrt(diag(cov_mat))
+    }
+  }
+  data.frame(
+    parameter = names(coef_values),
+    block = vapply(names(coef_values), parameter_block, character(1)),
+    estimate = as.numeric(coef_values),
+    std_error = as.numeric(se_values),
+    stringsAsFactors = FALSE
+  )
+}
+
 safe_aic <- function(fit, loglik, n_params) {
   value <- tryCatch(stats::AIC(fit), error = function(e) numeric(0))
   if (length(value) == 0 || is.na(value[1])) {
-    slot_value <- tryCatch(methods::slot(fit, "AIC"), error = function(e) NA_real_)
-    if (is.na(slot_value)) {
-      -2 * loglik + 2 * n_params
-    } else {
-      as.numeric(slot_value)
-    }
+    -2 * loglik + 2 * n_params
   } else {
     as.numeric(value[1])
   }
@@ -93,7 +125,6 @@ fit_and_write <- function(label, formula, mixture) {
   runtime <- as.numeric(proc.time()["elapsed"] - start_time)
   coef_frame <- safe_coef(fit)
   loglik <- safe_loglik(fit)
-  opt <- methods::slot(fit, "opt")
   meta <- data.frame(
     model = label,
     mixture = mixture,
@@ -102,8 +133,8 @@ fit_and_write <- function(label, formula, mixture) {
     n_params = nrow(coef_frame),
     K = 30,
     runtime_seconds = runtime,
-    convergence = ifelse(is.null(opt$convergence), NA, opt$convergence),
-    message = ifelse(is.null(opt$message), NA, opt$message),
+    convergence = NA,
+    message = "not exported by public validation accessors",
     stringsAsFactors = FALSE
   )
   utils::write.csv(meta, file.path(results_dir, paste0("r_", label, "_meta.csv")), row.names = FALSE)

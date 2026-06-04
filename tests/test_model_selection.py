@@ -1,7 +1,14 @@
 from __future__ import annotations
 
 import numpy as np
-from pyabundance import aic_table, compare_models, pcount, simulate_pcount
+from pyabundance import (
+    aic_table,
+    compare_models,
+    load_example_pcount,
+    pcount,
+    pcount_df,
+    simulate_pcount,
+)
 
 
 def test_aic_table_and_compare_models_rank_models():
@@ -58,3 +65,31 @@ def test_no_compatibility_warning_for_same_data_different_mixtures():
     warnings = " ".join(table["warnings"].tolist())
     assert "different K values" not in warnings
     assert "different response dimensions" not in warnings
+
+
+def test_no_compatibility_warning_for_different_formula_complexity_on_same_response():
+    data = load_example_pcount("poisson", n_sites=24)
+    intercept = pcount_df(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula="~ 1",
+        detection_formula="~ visit - 1",
+        K=data.K,
+    )
+    covariates = pcount_df(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula="~ forest + elevation",
+        detection_formula="~ visit - 1",
+        K=data.K,
+    )
+    table = compare_models({"intercept": intercept, "covariates": covariates}).table
+    warnings = " ".join(table["warnings"].tolist())
+    assert "different data_info" not in warnings
+    assert "different response dimensions" not in warnings
+    assert "different site counts" not in warnings
+    assert "different visit counts" not in warnings

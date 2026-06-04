@@ -52,6 +52,9 @@ def main() -> None:
 
     site_data = pd.read_csv(site_path)
     obs_data = pd.read_csv(obs_path)
+    obs_data["visit"] = pd.Categorical(
+        obs_data["visit"], categories=["v1", "v2", "v3"], ordered=True
+    )
     obs_data["date2"] = obs_data["date"] ** 2
     count_cols = ["y1", "y2", "y3"]
     common = {

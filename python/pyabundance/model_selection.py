@@ -82,7 +82,6 @@ def _compatibility_warnings(named_fits: list[tuple[str, Any]]) -> dict[str, list
         "visit_labels": [
             (name, _list_or_none(getattr(fit, "visit_labels", None))) for name, fit in named_fits
         ],
-        "data_info": [(name, getattr(fit, "data_info", None)) for name, fit in named_fits],
     }
     messages = {
         "K": "Models use different K values; AIC comparison may be affected by truncation choices.",
@@ -100,7 +99,6 @@ def _compatibility_warnings(named_fits: list[tuple[str, Any]]) -> dict[str, list
         ),
         "site_ids": "Models have different site_ids metadata.",
         "visit_labels": "Models have different visit_labels metadata.",
-        "data_info": "Models have different data_info metadata.",
     }
     for key, values in signatures.items():
         comparable = [(name, value) for name, value in values if value is not None]
