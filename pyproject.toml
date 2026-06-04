@@ -44,6 +44,10 @@ manifest-path = "crates/ecoabundance-py/Cargo.toml"
 python-source = "python"
 module-name = "pyabundance._core"
 features = ["pyo3/extension-module"]
+include = [
+  { path = "LICENSE", format = "sdist" },
+  { path = "NOTICE", format = "sdist" },
+]
 
 [tool.ruff]
 line-length = 100

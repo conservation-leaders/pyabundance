@@ -22,6 +22,18 @@ def test_release_metadata_and_optional_dependency_groups():
     assert "coverage" in pyproject["tool"]
 
 
+def test_maturin_sdist_includes_declared_license_files():
+    pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
+    includes = pyproject["tool"]["maturin"]["include"]
+    sdist_paths = {
+        item["path"]
+        for item in includes
+        if item.get("format") == "sdist" or "sdist" in item.get("format", [])
+    }
+
+    assert {"LICENSE", "NOTICE"} <= sdist_paths
+
+
 def test_release_docs_workflows_and_cleanup_policy_files_exist():
     required = [
         "CHANGELOG.md",
