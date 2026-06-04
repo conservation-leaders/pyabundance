@@ -50,7 +50,7 @@ Package versions cannot be overwritten on TestPyPI. If `1.0.0rc1` already exists
 
 ## 7. Clean up or bump dev versions
 
-After a successful rehearsal, decide whether to keep the exact version for the alpha tag or bump the development tree to the next planned version. Do not delete release evidence from `reports/` or `benchmark_artifacts/`.
+After a successful rehearsal, decide whether to keep the exact version for the alpha tag or bump the development tree to the next planned version. Do not commit generated release evidence from `reports/` or `benchmark_artifacts/`; keep generated artifacts in GitHub Actions artifacts or release assets.
 
 ## Wheel matrix platforms
 
@@ -72,3 +72,15 @@ Current runner labels:
 
 Do not use `macos-13`.
 
+
+## Trusted Publishing debug claims for rc1
+
+The rc1 publish workflow builds all artifacts successfully, but TestPyPI currently rejects the publish token until a maintainer configures the matching Trusted Publisher. The failed main-branch run reported these GitHub OIDC claims:
+
+- `sub`: `repo:conservation-leaders/pyabundance:ref:refs/heads/main`
+- `repository`: `conservation-leaders/pyabundance`
+- `workflow_ref`: `conservation-leaders/pyabundance/.github/workflows/publish-testpypi.yml@refs/heads/main`
+- `ref`: `refs/heads/main`
+- `environment`: `MISSING`
+
+Configure TestPyPI to trust repository `conservation-leaders/pyabundance` and workflow file `publish-testpypi.yml`. Leave the environment blank unless the workflow is changed to use a named GitHub environment.
