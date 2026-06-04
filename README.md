@@ -31,7 +31,8 @@ python -m venv .venv
 . .venv/bin/activate || source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e '.[dev]'
-maturin develop --release
+# Optional local developer rebuild inside the activated venv:
+# maturin develop --release
 ```
 
 TestPyPI rehearsal install, after maintainers publish the release candidate:

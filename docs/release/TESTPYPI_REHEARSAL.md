@@ -15,7 +15,7 @@ The workflow needs GitHub `id-token: write` permission and TestPyPI must trust t
 
 ## 2. Run workflow_dispatch
 
-Open GitHub Actions, choose **Publish to TestPyPI**, and run the workflow manually. It builds wheels and an sdist, runs `twine check`, uploads the `dist/` artifact, then publishes to TestPyPI through Trusted Publishing.
+Open GitHub Actions, choose **Publish to TestPyPI**, and run the workflow manually. It builds PyPI-compatible Linux/macOS/Windows wheels and an sdist, runs `twine check`, uploads the `dist/` artifact, then publishes to TestPyPI through Trusted Publishing. The workflow uses `maturin build`; it does not use `maturin develop`.
 
 ## 3. Inspect artifacts
 

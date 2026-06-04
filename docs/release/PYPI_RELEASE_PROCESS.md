@@ -1,6 +1,6 @@
 # PyPI Release Process
 
-v0.9 is a TestPyPI/external-alpha rehearsal. A real PyPI release requires explicit maintainer approval and a configured protected GitHub environment named `pypi-release`.
+v1.0.0rc1 is a TestPyPI/external-alpha release candidate. A real PyPI release requires explicit maintainer approval and a configured protected GitHub environment named `pypi-release`.
 
 ## Guardrails
 
@@ -8,6 +8,7 @@ v0.9 is a TestPyPI/external-alpha rehearsal. A real PyPI release requires explic
 - It requires the workflow input `confirm_real_pypi=publish-to-pypi`.
 - It uses PyPI Trusted Publishing (`id-token: write`) rather than an API token.
 - The repository must not store PyPI or TestPyPI tokens.
+- The workflow builds distributions with `maturin build`/`maturin sdist`; it must not call `maturin develop`.
 
 ## Before real PyPI
 

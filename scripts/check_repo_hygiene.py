@@ -13,6 +13,7 @@ GENERATED_PREFIXES = (
     ".venv/",
     ".venv",
     "htmlcov/",
+    "site/",
 )
 GENERATED_EXACT = {
     "coverage.xml",

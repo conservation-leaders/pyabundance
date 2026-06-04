@@ -2,79 +2,71 @@ name: CI
 
 on:
   push:
+    branches: [main, repo-cleanup-before-external-alpha, github-actions-stabilization]
   pull_request:
+    branches: [main]
 
 jobs:
   test:
-    name: test (${{ matrix.python-version }})
+    name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - uses: dtolnay/rust-toolchain@1.83
+          cache: pip
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.83
         with:
           components: rustfmt, clippy
-      - name: Install Python dependencies
+
+      - name: Install package and dev dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e '.[dev]'
-      - name: Rust fmt check
+          python -m pip install -e '.[dev,docs,release]'
+
+      - name: Rust format
         run: cargo fmt --all -- --check
+
       - name: Rust tests
         run: cargo test
+
       - name: Rust clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
-      - name: Build extension in editable mode
-        run: maturin develop
-      - name: Ruff format check
+
+      - name: Ruff format
         run: ruff format --check .
-      - name: Ruff
+
+      - name: Ruff check
         run: ruff check .
+
       - name: Mypy
-        run: mypy
+        run: mypy python/pyabundance
+
+      - name: Pytest
+        run: pytest -q
+
+      - name: Coverage
+        if: matrix.python-version == '3.11'
+        run: pytest --cov=pyabundance --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+
       - name: Repository hygiene
         run: python scripts/check_repo_hygiene.py
-      - name: Python tests with coverage
-        run: pytest --cov=pyabundance --cov-report=xml --cov-report=term-missing --cov-fail-under=80 -q
+
+      - name: GitHub Actions sanity
+        run: python scripts/check_github_actions.py
+
       - name: Upload coverage XML
+        if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.python-version }}
           path: coverage.xml
-
-  benchmark-smoke:
-    name: benchmark smoke
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-      - uses: dtolnay/rust-toolchain@1.83
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e '.[dev]'
-          maturin develop --release
-      - name: Run Python benchmark smoke checks
-        run: |
-          python benchmarks/generate_pcount_dataset.py
-          python benchmarks/run_py_benchmark.py
-          python benchmarks/run_py_loglik_benchmark.py
-          python benchmarks/run_formula_overhead_benchmark.py
-          python benchmarks/run_uncertainty_benchmark.py
-          python benchmarks/run_posterior_abundance_benchmark.py
-          python benchmarks/run_reporting_workflow.py
-      - name: Upload benchmark artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: benchmark-reports
-          path: |
-            reports/*.json
-            reports/*.md

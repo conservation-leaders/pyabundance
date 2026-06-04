@@ -16,7 +16,7 @@ pyabundance keeps source, tests, docs, workflows, scripts, and benchmark generat
 
 ## Do not track by default
 
-- `dist/`, `build/`, `wheelhouse/`
+- `dist/`, `build/`, `wheelhouse/`, `site/`
 - `target/`
 - `.venv/`, `.venv*/`, `.env/`
 - `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `__pycache__/`
@@ -52,6 +52,10 @@ Optional R black-box comparisons require R and `unmarked`:
 Rscript benchmarks/run_r_unmarked_benchmark.R || true
 python benchmarks/compare_benchmarks.py
 ```
+
+## GitHub Actions install policy
+
+GitHub Actions workflows should not call `maturin develop`. CI, docs, and benchmark jobs use pip editable installs (`python -m pip install -e ...`), wheel/release jobs use `maturin build`, and TestPyPI install jobs install published packages only. See `docs/development/GITHUB_ACTIONS.md`.
 
 ## Hygiene check
 

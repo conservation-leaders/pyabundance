@@ -10,11 +10,12 @@ on:
       - "crates/**"
       - "python/**"
       - "scripts/smoke_test_wheel.py"
+      - "scripts/smoke_test_installed.py"
       - ".github/workflows/wheels.yml"
 
 jobs:
   build-wheels:
-    name: build ${{ matrix.target }}
+    name: Build wheel ${{ matrix.artifact }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -22,36 +23,62 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64
+            manylinux: "2014"
             artifact: linux-x86_64
           - os: macos-13
             target: x86_64
+            manylinux: "off"
             artifact: macos-x86_64
-          - os: macos-latest
+          - os: macos-14
             target: aarch64
+            manylinux: "off"
             artifact: macos-arm64
           - os: windows-latest
             target: x64
+            manylinux: "off"
             artifact: windows-x86_64
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Set up Python
+        if: runner.os != 'Linux'
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - name: Build wheel with maturin
         uses: PyO3/maturin-action@v1
         with:
+          command: build
           target: ${{ matrix.target }}
-          args: --release --out dist
-          sccache: 'true'
-          manylinux: auto
+          args: --release --out dist --compatibility pypi
+          manylinux: ${{ matrix.manylinux }}
+          sccache: "true"
       - name: Upload wheel artifact
         uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.artifact }}
-          path: dist/*
+          path: dist/*.whl
+
+  build-sdist:
+    name: Build sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install maturin
+        run: python -m pip install --upgrade pip maturin
+      - name: Build sdist
+        run: maturin sdist --out dist
+      - name: Upload sdist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
 
   smoke-test-wheels:
-    name: smoke ${{ matrix.os }}
+    name: Smoke test ${{ matrix.artifact }}
     needs: build-wheels
     runs-on: ${{ matrix.os }}
     strategy:
@@ -62,7 +89,7 @@ jobs:
             artifact: linux-x86_64
           - os: macos-13
             artifact: macos-x86_64
-          - os: macos-latest
+          - os: macos-14
             artifact: macos-arm64
           - os: windows-latest
             artifact: windows-x86_64
@@ -71,6 +98,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
       - uses: actions/download-artifact@v4
         with:
           name: wheels-${{ matrix.artifact }}
@@ -79,10 +107,11 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python scripts/smoke_test_wheel.py dist
+          python scripts/smoke_test_wheel.py dist --expected-version 1.0.0rc1
       - name: Upload wheel matrix status
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: wheel-status-${{ matrix.artifact }}
           path: reports/WHEEL_MATRIX_STATUS.md
+          if-no-files-found: ignore

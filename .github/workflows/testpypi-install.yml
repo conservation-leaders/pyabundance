@@ -10,7 +10,7 @@ on:
 
 jobs:
   install-testpypi:
-    name: install TestPyPI (${{ matrix.label }})
+    name: Install TestPyPI ${{ matrix.label }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -20,7 +20,7 @@ jobs:
             label: linux-x86_64
           - os: macos-13
             label: macos-x86_64
-          - os: macos-latest
+          - os: macos-14
             label: macos-arm64
           - os: windows-latest
             label: windows-x86_64
@@ -29,6 +29,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
       - name: Install from TestPyPI
         shell: bash
         run: |
@@ -36,6 +37,6 @@ jobs:
           python -m pip install \
             --index-url https://test.pypi.org/simple/ \
             --extra-index-url https://pypi.org/simple/ \
-            "pyabundance==${{ github.event.inputs.version }}"
+            "pyabundance==${{ inputs.version }}"
       - name: Smoke test installed package
-        run: python scripts/smoke_test_installed.py --expected-version "${{ github.event.inputs.version }}"
+        run: python scripts/smoke_test_installed.py --expected-version "${{ inputs.version }}"

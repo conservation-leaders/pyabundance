@@ -18,12 +18,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
       - uses: dtolnay/rust-toolchain@1.83
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           python -m pip install -e '.[dev,benchmark]'
-          maturin develop --release
       - name: Run Python benchmarks
         run: |
           python benchmarks/generate_pcount_dataset.py
@@ -68,4 +68,5 @@ jobs:
             reports/*.json
             reports/*.txt
             benchmark_artifacts/**
+            data/benchmark/**
             coverage.xml
