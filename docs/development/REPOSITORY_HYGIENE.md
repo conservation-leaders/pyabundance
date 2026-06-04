@@ -19,6 +19,7 @@ pyabundance keeps source, tests, docs, workflows, scripts, and benchmark generat
 - `dist/`, `build/`, `wheelhouse/`, `site/`
 - `target/`
 - `.venv/`, `.venv*/`, `.env/`
+- `.omx/` local OMX/Codex runtime state
 - `.pytest_cache/`, `.ruff_cache/`, `.mypy_cache/`, `__pycache__/`
 - `.coverage`, `coverage.xml`, `htmlcov/`
 - generated `reports/*.json`
@@ -99,6 +100,44 @@ Current runner labels:
 - Windows x86_64: `windows-latest`
 
 Do not use `macos-13`.
+
+## OMX / oh-my-codex local state
+
+The `.omx/` directory is local runtime state created by the OMX/Codex harness. It may contain metrics, notification state, logs, and other files that change frequently while the harness is running.
+
+These files are not pyabundance source code and should not be committed. The directory is ignored by git:
+
+```gitignore
+/.omx/
+```
+
+If the harness needs these files, it will recreate them locally. Tracked `.omx/` files are treated as a repository hygiene failure.
+
+### Zed users
+
+If Zed keeps scanning `.omx/` and performance degrades, add `.omx` to Zed's file scan exclusions.
+
+Example Zed setting:
+
+```json
+{
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/.omx",
+    "**/.omx/**"
+  ]
+}
+```
+
+When overriding Zed `file_scan_exclusions`, preserve Zed's default exclusions as well as adding `.omx`.
 
 ## Hygiene check
 

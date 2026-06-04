@@ -67,6 +67,10 @@ Current runner labels:
 
 Do not use `macos-13`.
 
+## Local runtime state
+
+`.omx/` is ignored and forbidden from git tracking. It is local OMX/Codex runtime state, not CI input or release evidence, and `scripts/check_repo_hygiene.py` fails if `.omx/` files are tracked.
+
 ## Validation
 
 - Rust sanity: `rustup show`, `rustc --version`, `cargo --version`, `cargo fmt --version`, and `cargo clippy --version` passed locally with Rust 1.83.0 after installing local rustfmt/clippy components.

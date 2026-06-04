@@ -6,6 +6,7 @@ from pathlib import Path
 
 ALLOWED_REPORTS = {"reports/README.md"}
 GENERATED_PREFIXES = (
+    ".omx/",
     "benchmark_artifacts/",
     "data/benchmark/",
     "dist/",
@@ -22,6 +23,26 @@ GENERATED_EXACT = {
 GENERATED_REPORT_SUFFIXES = (".json", ".md", ".txt", ".xml")
 
 
+def normalize_tracked_path(path: str) -> str:
+    """Return a git-style relative path for hygiene checks."""
+    normalized = path.strip().replace("\\", "/")
+    while normalized.startswith("./"):
+        normalized = normalized[2:]
+    return normalized
+
+
+def is_forbidden_tracked_path(path: str) -> bool:
+    """Return True when a tracked path is generated/local state."""
+    normalized = normalize_tracked_path(path)
+    if normalized in GENERATED_EXACT:
+        return True
+    if any(normalized.startswith(prefix) for prefix in GENERATED_PREFIXES):
+        return True
+    if normalized.startswith("reports/") and normalized not in ALLOWED_REPORTS:
+        return Path(normalized).suffix in GENERATED_REPORT_SUFFIXES
+    return False
+
+
 def tracked_files() -> list[str]:
     try:
         result = subprocess.run(
@@ -36,18 +57,7 @@ def tracked_files() -> list[str]:
 
 
 def generated_tracked(files: list[str]) -> list[str]:
-    bad: list[str] = []
-    for path in files:
-        if path in GENERATED_EXACT:
-            bad.append(path)
-            continue
-        if any(path.startswith(prefix) for prefix in GENERATED_PREFIXES):
-            bad.append(path)
-            continue
-        if path.startswith("reports/") and path not in ALLOWED_REPORTS:
-            if Path(path).suffix in GENERATED_REPORT_SUFFIXES:
-                bad.append(path)
-    return sorted(bad)
+    return sorted(normalize_tracked_path(path) for path in files if is_forbidden_tracked_path(path))
 
 
 def main() -> int:
@@ -57,7 +67,7 @@ def main() -> int:
         print(str(exc), file=sys.stderr)
         return 2
     if bad:
-        print("Generated artifacts are tracked by git:", file=sys.stderr)
+        print("Generated or local runtime artifacts are tracked by git:", file=sys.stderr)
         for path in bad:
             print(f"- {path}", file=sys.stderr)
         print("\nUntrack generated artifacts or move curated content into docs/.", file=sys.stderr)

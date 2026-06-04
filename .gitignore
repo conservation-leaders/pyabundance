@@ -8,6 +8,9 @@
 .env
 *.egg-info/
 
+# OMX / oh-my-codex local runtime state
+/.omx/
+
 # Python caches
 __pycache__/
 .pytest_cache/
