@@ -10,6 +10,9 @@ jobs:
   test:
     name: Test Python ${{ matrix.python-version }}
     runs-on: ubuntu-latest
+    env:
+      RUSTUP_TOOLCHAIN: 1.83.0
+      CARGO_TERM_COLOR: always
     strategy:
       fail-fast: false
       matrix:
@@ -24,9 +27,17 @@ jobs:
           cache: pip
 
       - name: Set up Rust
-        uses: dtolnay/rust-toolchain@1.83
+        uses: dtolnay/rust-toolchain@1.83.0
         with:
           components: rustfmt, clippy
+
+      - name: Rust toolchain sanity check
+        run: |
+          rustup show
+          rustc --version
+          cargo --version
+          cargo fmt --version
+          cargo clippy --version
 
       - name: Install package and dev dependencies
         run: |

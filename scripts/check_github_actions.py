@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 WORKFLOW_DIR = Path(".github/workflows")
+TOOLCHAIN_FILE = Path("rust-toolchain.toml")
+REQUIRED_RUST_TOOLCHAIN = "1.83.0"
 REQUIRED_PLATFORM_LABELS = {
     "ubuntu-latest": "Linux x86_64",
     "macos-15-intel": "macOS x86_64",
@@ -69,6 +71,16 @@ def check_workflow_text(path: Path, text: str) -> list[Violation]:
         if needle in text:
             violations.append(Violation(path, message, _line_number(text, needle)))
 
+    rust_action_match = re.search(r"dtolnay/rust-toolchain@([^\s]+)", text)
+    if rust_action_match and rust_action_match.group(1) != REQUIRED_RUST_TOOLCHAIN:
+        violations.append(
+            Violation(
+                path,
+                f"use exact Rust toolchain {REQUIRED_RUST_TOOLCHAIN} in dtolnay/rust-toolchain",
+                text[: rust_action_match.start()].count("\n") + 1,
+            )
+        )
+
     token_patterns = [
         r"\bPYPI_API_TOKEN\b",
         r"\bTEST_PYPI_API_TOKEN\b",
@@ -119,6 +131,29 @@ def check_workflow_text(path: Path, text: str) -> list[Violation]:
     return violations
 
 
+def check_toolchain_file(path: Path = TOOLCHAIN_FILE) -> list[Violation]:
+    if not path.exists():
+        return [Violation(path, "rust-toolchain.toml does not exist")]
+    text = path.read_text()
+    violations: list[Violation] = []
+    if f'channel = "{REQUIRED_RUST_TOOLCHAIN}"' not in text:
+        violations.append(
+            Violation(path, f"rust-toolchain.toml must pin channel {REQUIRED_RUST_TOOLCHAIN}")
+        )
+    if 'profile = "minimal"' not in text:
+        violations.append(
+            Violation(path, 'rust-toolchain.toml should use profile = "minimal" for CI stability')
+        )
+    if "components" in text:
+        violations.append(
+            Violation(
+                path,
+                "install rustfmt/clippy in workflow setup, not rust-toolchain.toml components",
+            )
+        )
+    return violations
+
+
 def check_workflows(workflow_dir: Path = WORKFLOW_DIR) -> list[Violation]:
     if not workflow_dir.exists():
         return [Violation(workflow_dir, "workflow directory does not exist")]
@@ -127,6 +162,7 @@ def check_workflows(workflow_dir: Path = WORKFLOW_DIR) -> list[Violation]:
         violations.extend(check_workflow_text(path, path.read_text()))
     for path in sorted(workflow_dir.glob("*.yaml")):
         violations.extend(check_workflow_text(path, path.read_text()))
+    violations.extend(check_toolchain_file())
     return violations
 
 

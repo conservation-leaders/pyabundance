@@ -53,6 +53,29 @@ Rscript benchmarks/run_r_unmarked_benchmark.R || true
 python benchmarks/compare_benchmarks.py
 ```
 
+## Rust toolchain policy
+
+The project pins Rust to `1.83.0` for release-candidate builds.
+
+In CI:
+
+- install Rust explicitly before Python editable installs;
+- use exact toolchain version `1.83.0`;
+- install `rustfmt` and `clippy` through the GitHub Actions Rust setup step when those checks are run;
+- run `rustup show`, `rustc --version`, `cargo --version`, `cargo fmt --version`, and `cargo clippy --version` before `pip install -e` in CI;
+- do not rely on maturin to discover or install Rust during pip metadata generation.
+
+`rust-toolchain.toml` pins the toolchain version with `profile = "minimal"` and does not install clippy/rustfmt components implicitly in CI.
+
+Local development:
+
+- developers may use `maturin develop` inside an activated virtual environment;
+- developers may install components manually if needed:
+
+```bash
+rustup component add rustfmt clippy --toolchain 1.83.0
+```
+
 ## GitHub Actions install policy
 
 GitHub Actions workflows should not call `maturin develop`. CI, docs, and benchmark jobs use pip editable installs (`python -m pip install -e ...`), wheel/release jobs use `maturin build`, and TestPyPI install jobs install published packages only. See `docs/development/GITHUB_ACTIONS.md`.

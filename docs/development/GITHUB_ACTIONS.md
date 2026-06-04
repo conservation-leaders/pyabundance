@@ -11,6 +11,29 @@ pyabundance is a mixed Rust/Python package built with maturin. GitHub Actions mu
 - Wheel smoke tests install built wheels with pip and then run installed-package smoke tests.
 - TestPyPI install workflows install from TestPyPI only and do not build locally.
 
+## Rust toolchain policy
+
+The project pins Rust to `1.83.0` for release-candidate builds.
+
+In CI:
+
+- install Rust explicitly before Python editable installs;
+- use exact toolchain version `1.83.0`;
+- install `rustfmt` and `clippy` through the GitHub Actions Rust setup step when those checks are run;
+- run `rustup show`, `rustc --version`, `cargo --version`, `cargo fmt --version`, and `cargo clippy --version` before `pip install -e` in CI;
+- do not rely on maturin to discover or install Rust during pip metadata generation.
+
+`rust-toolchain.toml` pins the toolchain version with `profile = "minimal"` and does not install clippy/rustfmt components implicitly in CI.
+
+Local development:
+
+- developers may use `maturin develop` inside an activated virtual environment;
+- developers may install components manually if needed:
+
+```bash
+rustup component add rustfmt clippy --toolchain 1.83.0
+```
+
 ## Wheel matrix platforms
 
 pyabundance includes a Rust/PyO3 native extension, so wheels are platform-specific. Release-candidate wheels must be built and smoke-tested for:
