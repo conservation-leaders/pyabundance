@@ -10,7 +10,7 @@ Download a wheel from a GitHub Actions artifact, then run:
 
 ```bash
 python -m pip install pyabundance-*.whl
-python scripts/smoke_test_installed.py --expected-version 1.0.0rc1
+python scripts/smoke_test_installed.py --expected-version 1.0.0rc2
 ```
 
 ### From TestPyPI
@@ -19,7 +19,7 @@ python scripts/smoke_test_installed.py --expected-version 1.0.0rc1
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  pyabundance==1.0.0rc1
+  pyabundance==1.0.0rc2
 ```
 
 ### From source
@@ -97,3 +97,13 @@ Current runner labels:
 
 Do not use `macos-13`.
 
+
+
+## RC2 UX questions
+
+- Did `analyze_pcount()` feel too magical or appropriately helpful?
+- Did warnings help or confuse?
+- Did DataFrame outputs feel natural?
+- Was anything harder than equivalent R unmarked?
+- Would you reach for pyabundance first in a Python workflow?
+- Try `K="auto"`, report export, posterior abundance, and `compare_models` with both dict keys and `names=[...]`.

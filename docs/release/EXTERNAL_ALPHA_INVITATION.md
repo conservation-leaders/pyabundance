@@ -1,12 +1,12 @@
 # External alpha invitation
 
-Subject: pyabundance v1.0.0rc1 external alpha review
+Subject: pyabundance v1.0.0rc2 external alpha review
 
 Hi [Name],
 
 We are preparing pyabundance v1.0.0, a clean-room Rust-backed Python package for single-season pcount-style ecological abundance models.
 
-Could you spend 30–60 minutes testing v1.0.0rc1?
+Could you spend 30–60 minutes testing v1.0.0rc2?
 
 Please try:
 
@@ -20,3 +20,6 @@ Clean-room note:
 Please do not paste GPL R package source code into issues, PRs, comments, or feedback. Behavioural comparisons, public docs, published equations, and black-box output comparisons are welcome.
 
 Thanks.
+
+
+For RC2, please try `analyze_pcount`, `pcount_df`, `K="auto"`, report export, posterior abundance, and `compare_models(..., names=[...])`.

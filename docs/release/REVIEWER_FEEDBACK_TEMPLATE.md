@@ -21,3 +21,12 @@ Optional details:
 - model tried: Poisson / negative-binomial / zero-inflated Poisson
 - dataset shape: sites, visits, covariates
 - error output or traceback, if any
+
+
+## RC2 workflow feedback
+
+- `analyze_pcount()` helpful or too magical?
+- Warnings helpful or confusing?
+- DataFrame outputs natural?
+- Anything harder than R unmarked?
+- Would you reach for pyabundance first in Python?

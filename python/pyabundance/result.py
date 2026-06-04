@@ -51,6 +51,9 @@ class PCountResult:
     detection_formula: str | None = None
     from_dataframe: bool = False
     data_info: dict[str, int] | None = None
+    K_info: Any | None = None
+    visit_label_source: str | None = None
+    visit_label_message: str | None = None
     covariance: NDArray[np.float64] | None = None
     standard_errors: NDArray[np.float64] | None = None
     cov_method: str = "none"
@@ -135,8 +138,12 @@ class PCountResult:
         return self.covariance.copy()
 
     def coef_table(
-        self, level: float = 0.95, include_z: bool = True, include_p: bool = False
-    ) -> pd.DataFrame:
+        self,
+        level: float = 0.95,
+        include_z: bool = True,
+        include_p: bool = False,
+        as_dataframe: bool = True,
+    ) -> pd.DataFrame | list[dict[str, Any]]:
         se = (
             self.standard_errors.copy()
             if self.standard_errors is not None
@@ -163,7 +170,15 @@ class PCountResult:
             rows["z"] = z_values
         if include_p:
             rows["p"] = 2.0 * norm.sf(np.abs(z_values))
-        return pd.DataFrame(rows)
+        table = pd.DataFrame(rows)
+        if as_dataframe:
+            return table
+        return table.to_dict(orient="records")
+
+    def coefficients(self, **kwargs: Any) -> pd.DataFrame | list[dict[str, Any]]:
+        """Alias for :meth:`coef_table`."""
+
+        return self.coef_table(**kwargs)
 
     def confint(
         self, level: float = 0.95, method: str = "wald", scale: str = "link"
@@ -172,7 +187,8 @@ class PCountResult:
             raise ValueError("only Wald confidence intervals are implemented")
         if scale != "link":
             raise ValueError("only link-scale coefficient intervals are implemented")
-        table = self.coef_table(level=level, include_z=False, include_p=False)
+        table = self.coef_table(level=level, include_z=False, include_p=False, as_dataframe=True)
+        assert isinstance(table, pd.DataFrame)
         return table[["parameter", "estimate", "lower", "upper"]]
 
     def transformed_params(self, level: float = 0.95) -> pd.DataFrame:
@@ -556,6 +572,14 @@ class PCountResult:
 
         return result_diagnostics(self)
 
+    def warning_summary(self) -> str:
+        warnings = list(self.warnings or [])
+        cov_warnings = (self.covariance_diagnostics or {}).get("warnings", [])
+        warnings.extend(str(w) for w in cov_warnings)
+        if not warnings:
+            return "No warnings."
+        return "\n".join(f"- {warning}" for warning in warnings)
+
     def parametric_bootstrap(self, *args: Any, **kwargs: Any):
         from pyabundance.bootstrap import parametric_bootstrap
 
@@ -616,7 +640,12 @@ class PCountResult:
                     f"detection formula: {self.detection_formula}",
                 ]
             )
-        table = self.coef_table(include_z=False)
+        if self.visit_labels is not None:
+            lines.append(f"visit labels: {self.visit_labels}")
+        if self.visit_label_message:
+            lines.append(self.visit_label_message)
+        table = self.coef_table(include_z=False, as_dataframe=True)
+        assert isinstance(table, pd.DataFrame)
         lines.append("coefficients:")
         has_se = np.any(np.isfinite(table["std.error"].to_numpy(dtype=np.float64)))
         for _, row in table.iterrows():

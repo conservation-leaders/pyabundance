@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def test_release_metadata_and_optional_dependency_groups():
     pyproject = tomllib.loads((ROOT / "pyproject.toml").read_text())
-    assert pyproject["project"]["version"] == __version__ == "1.0.0rc1"
+    assert pyproject["project"]["version"] == __version__ == "1.0.0rc2"
     assert "urls" in pyproject["project"]
     extras = pyproject["project"]["optional-dependencies"]
     for group in ["dev", "docs", "test", "benchmark", "release"]:

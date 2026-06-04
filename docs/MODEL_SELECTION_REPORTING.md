@@ -86,3 +86,8 @@ Available synthetic examples are `"poisson"`, `"negative_binomial"`, and `"zip"`
 ## Posterior abundance note
 
 See `docs/POSTERIOR_ABUNDANCE.md` for ranef-like latent abundance summaries and posterior predictive checks. These condition on fitted parameters and should be interpreted separately from uncertainty intervals over fitted coefficients.
+
+
+## RC2 guided workflow note
+
+`analyze_pcount()` is the easiest entry point for common pcount analyses. `K="auto"` resolves a conservative integration limit once before fitting. `visit_labels="auto"` can infer observation visit labels when count columns and visit labels use different names.

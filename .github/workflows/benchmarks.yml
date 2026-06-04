@@ -63,7 +63,7 @@ jobs:
       - name: Summary and preserve artifacts
         run: |
           python benchmarks/compare_benchmark_summary.py || true
-          python scripts/preserve_benchmark_artifacts.py --version 1.0.0rc1 || true
+          python scripts/preserve_benchmark_artifacts.py --version 1.0.0rc2 || true
       - name: Upload benchmark artifacts
         uses: actions/upload-artifact@v4
         with:

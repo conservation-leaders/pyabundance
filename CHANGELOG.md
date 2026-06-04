@@ -2,6 +2,10 @@
 
 All notable changes to pyabundance are recorded here. The project follows a pragmatic pre-1.0 semantic-versioning style: minor versions may add public APIs, while patch versions should preserve behavior.
 
+## 1.0.0rc2 - UX hardening / guided workflow
+
+RC2 focuses on UX hardening: guided `analyze_pcount`, `K="auto"` and `suggest_K`, smarter visit-label handling, clearer visit-label errors, `compare_models(names=...)`, `coef_table(as_dataframe=True)`, deterministic explanation/report UX, Mallard validation docs, and performance architecture docs. It adds no new ecological model family and makes no intentional likelihood formula changes.
+
 ## 1.0.0rc1 - Release candidate / external alpha
 
 - Prepared release-candidate metadata and documentation.

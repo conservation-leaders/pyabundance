@@ -1,8 +1,10 @@
 """Clean-room ecological abundance models with a Rust numerical core."""
 
+from pyabundance.analysis import PCountAnalysis, analyze_pcount
 from pyabundance.bootstrap import BootstrapResult, parametric_bootstrap
 from pyabundance.datasets import ExamplePCountData, list_example_datasets, load_example_pcount
 from pyabundance.formula import PCountMatrices, build_pcount_matrices, pcount_df
+from pyabundance.k_selection import KSuggestion, suggest_K
 from pyabundance.model_selection import ModelComparison, aic_table, compare_models
 from pyabundance.pcount import pcount
 from pyabundance.ranef import TotalAbundancePosterior
@@ -19,10 +21,13 @@ __all__ = [
     "BootstrapResult",
     "ExamplePCountData",
     "ModelComparison",
+    "PCountAnalysis",
     "PCountMatrices",
     "PCountResult",
+    "KSuggestion",
     "TotalAbundancePosterior",
     "aic_table",
+    "analyze_pcount",
     "build_pcount_matrices",
     "compare_models",
     "export_model_report",
@@ -36,6 +41,7 @@ __all__ = [
     "simulate_pcount",
     "simulate_pcount_negbin",
     "simulate_pcount_zip",
+    "suggest_K",
 ]
-__version__ = "1.0.0rc1"
+__version__ = "1.0.0rc2"
 __rust_version__ = _rust_version

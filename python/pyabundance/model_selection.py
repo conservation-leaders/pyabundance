@@ -8,11 +8,25 @@ import numpy as np
 import pandas as pd
 
 
-def _as_named_fits(fits: Iterable[Any] | dict[str, Any]) -> list[tuple[str, Any]]:
+def _as_named_fits(
+    fits: Iterable[Any] | dict[str, Any], names: Iterable[Any] | None = None
+) -> list[tuple[str, Any]]:
     if isinstance(fits, dict):
+        if names is not None:
+            raise ValueError("names cannot be used when fits is a dict; use dict keys instead")
         return [(str(name), fit) for name, fit in fits.items()]
+    fits_list = list(fits)
+    if names is not None:
+        name_list = [str(name) for name in names]
+        if len(name_list) != len(fits_list):
+            raise ValueError("names must have the same length as fits")
+        if len(set(name_list)) != len(name_list):
+            raise ValueError("names must be unique")
+        if not fits_list:
+            raise ValueError("at least one fitted model is required")
+        return list(zip(name_list, fits_list, strict=True))
     out = []
-    for idx, fit in enumerate(fits):
+    for idx, fit in enumerate(fits_list):
         label = getattr(fit, "label", None) or f"model_{idx + 1}"
         if getattr(fit, "from_dataframe", False) and getattr(fit, "mixture", None):
             label = f"{fit.mixture}_{idx + 1}"
@@ -22,25 +36,34 @@ def _as_named_fits(fits: Iterable[Any] | dict[str, Any]) -> list[tuple[str, Any]
     return out
 
 
-def aic_table(fits: Iterable[Any] | dict[str, Any], *, sort: bool = True) -> pd.DataFrame:
+def aic_table(
+    fits: Iterable[Any] | dict[str, Any],
+    *,
+    names: Iterable[Any] | None = None,
+    sort: bool = True,
+    include_warnings: bool = True,
+    check_compatibility: bool = True,
+) -> pd.DataFrame:
     """Build an AIC model-selection table from fitted pyabundance models."""
+    del check_compatibility  # reserved for future compatibility checks
     rows = []
-    for name, fit in _as_named_fits(fits):
-        rows.append(
-            {
-                "model": name,
-                "mixture": fit.mixture,
-                "n_params": int(fit.params.size),
-                "logLik": float(fit.loglik),
-                "AIC": float(fit.aic),
-                "K": int(fit.K),
-                "success": bool(fit.success),
-                "nfev": fit.nfev,
-                "nit": fit.nit,
-                "abundance_formula": fit.abundance_formula,
-                "detection_formula": fit.detection_formula,
-            }
-        )
+    for name, fit in _as_named_fits(fits, names=names):
+        row = {
+            "model": name,
+            "mixture": fit.mixture,
+            "n_params": int(fit.params.size),
+            "logLik": float(fit.loglik),
+            "AIC": float(fit.aic),
+            "K": int(fit.K),
+            "success": bool(fit.success),
+            "nfev": fit.nfev,
+            "nit": fit.nit,
+            "abundance_formula": fit.abundance_formula,
+            "detection_formula": fit.detection_formula,
+        }
+        if include_warnings:
+            row["warnings"] = "; ".join(str(w) for w in (fit.warnings or []))
+        rows.append(row)
     table = pd.DataFrame(rows)
     if sort:
         table = table.sort_values("AIC", kind="mergesort").reset_index(drop=True)
@@ -66,6 +89,8 @@ def aic_table(fits: Iterable[Any] | dict[str, Any], *, sort: bool = True) -> pd.
         "abundance_formula",
         "detection_formula",
     ]
+    if include_warnings:
+        cols.append("warnings")
     return table[cols]
 
 
@@ -97,11 +122,23 @@ class ModelComparison:
         return text
 
 
-def compare_models(fits: Iterable[Any] | dict[str, Any], *, sort: bool = True) -> ModelComparison:
+def compare_models(
+    fits: Iterable[Any] | dict[str, Any],
+    *,
+    names: Iterable[Any] | None = None,
+    sort: bool = True,
+    include_warnings: bool = True,
+    check_compatibility: bool = True,
+) -> ModelComparison:
     """Compare fitted pyabundance models with an AIC table and markdown summary."""
 
-    named = _as_named_fits(fits)
-    table = aic_table(dict(named), sort=sort)
+    named = _as_named_fits(fits, names=names)
+    table = aic_table(
+        dict(named),
+        sort=sort,
+        include_warnings=include_warnings,
+        check_compatibility=check_compatibility,
+    )
     return ModelComparison(table=table, models=dict(named))
 
 
