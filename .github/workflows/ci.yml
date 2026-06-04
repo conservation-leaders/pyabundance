@@ -38,6 +38,8 @@ jobs:
         run: ruff check .
       - name: Mypy
         run: mypy
+      - name: Repository hygiene
+        run: python scripts/check_repo_hygiene.py
       - name: Python tests with coverage
         run: pytest --cov=pyabundance --cov-report=xml --cov-report=term-missing --cov-fail-under=80 -q
       - name: Upload coverage XML
