@@ -1,11 +1,55 @@
+# Rust
 /target/
+
+# Python environments
 /.venv/
+/.venv*/
+/.env/
+.env
 *.egg-info/
+
+# Python caches
 __pycache__/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
+*.py[cod]
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# Build artifacts
+/dist/
+/build/
+/wheelhouse/
+
+# Native extensions
 *.so
 *.dylib
 *.dll
+*.pyd
+
+# OS/editor
 .DS_Store
+.idea/
+.vscode/
+
+# Generated benchmark data and reports
+/data/benchmark/
+/reports/*.json
+/reports/*.txt
+/reports/*.xml
+/reports/*.md
+!/reports/README.md
+/benchmark_artifacts/
+
+# Temporary smoke-test envs
+/.wheel-test/
+/.sdist-test/
+/.install-test/
+
+# Misc generated inventories
+reports_tracked_files_before_cleanup.txt
+reports_all_files_before_cleanup.txt

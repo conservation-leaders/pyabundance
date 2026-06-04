@@ -26,11 +26,11 @@ classifiers = [
 dependencies = ["numpy", "scipy", "pandas", "formulaic"]
 
 [project.urls]
-Homepage = "https://github.com/pyabundance/pyabundance"
-Documentation = "https://github.com/pyabundance/pyabundance#readme"
-Repository = "https://github.com/pyabundance/pyabundance"
-Issues = "https://github.com/pyabundance/pyabundance/issues"
-Changelog = "https://github.com/pyabundance/pyabundance/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/conservation-leaders/pyabundance"
+Documentation = "https://github.com/conservation-leaders/pyabundance#readme"
+Repository = "https://github.com/conservation-leaders/pyabundance"
+Issues = "https://github.com/conservation-leaders/pyabundance/issues"
+Changelog = "https://github.com/conservation-leaders/pyabundance/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
