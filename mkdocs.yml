@@ -33,6 +33,10 @@ nav:
       - Cleanup Summary: development/REPO_CLEANUP_SUMMARY.md
   - Release:
       - External Alpha Review: release/EXTERNAL_ALPHA_REVIEW.md
+      - External Alpha Execution Status: release/EXTERNAL_ALPHA_EXECUTION_STATUS.md
+      - External Alpha Invitation: release/EXTERNAL_ALPHA_INVITATION.md
+      - External Alpha Tracker: release/EXTERNAL_ALPHA_TRACKER.md
+      - RC Feedback Triage: release/RC_FEEDBACK_TRIAGE.md
       - Reviewer Feedback Template: release/REVIEWER_FEEDBACK_TEMPLATE.md
       - TestPyPI Rehearsal: release/TESTPYPI_REHEARSAL.md
       - Release Checklist: release/RELEASE_CHECKLIST.md
