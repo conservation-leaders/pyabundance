@@ -1,35 +1,56 @@
 # GitHub Actions stabilization
 
-## Issue fixed
+## Issues fixed
 
-- Previous issue: `maturin develop` was called in GitHub Actions without a virtualenv.
-- Current issue: `tests/test_release_engineering.py` still expected `benchmark_artifacts/README.md` after repository cleanup.
+- `maturin develop` was called in GitHub Actions without a virtualenv.
+- `tests/test_release_engineering.py` expected `benchmark_artifacts/README.md` after repository cleanup.
+- `wheels.yml` used the stale `macos-13` runner label for macOS x86_64 wheel jobs.
 
-## Root cause
+## Root causes
 
-`benchmark_artifacts/` is now generated and ignored after repository cleanup, but the release-engineering test still expected a tracked file under that directory.
+- `maturin develop` is a local-development command that expects an activated virtualenv; GitHub Actions `setup-python` does not create one.
+- `benchmark_artifacts/` is now generated and ignored after repository cleanup, but the release-engineering test still expected a tracked file under that directory.
+- The wheel matrix used an outdated macOS Intel runner label, causing jobs to wait for unavailable hosted runners.
 
-## Fix
+## Fixes
 
+- Removed `maturin develop` from GitHub Actions workflows.
 - Removed `benchmark_artifacts/README.md` from required tracked files.
 - Added cleanup-policy assertions for `reports/README.md`, repository hygiene docs, benchmark docs, artifact preservation script, benchmark upload workflow, and the repo hygiene script.
-- Confirmed generated artifacts remain untracked.
-- Kept benchmark scripts and artifact-upload workflows tracked.
+- Updated wheel, TestPyPI install, TestPyPI publish, and guarded PyPI publish matrices to current macOS labels.
+- Strengthened `scripts/check_github_actions.py` to reject `macos-13`, deprecated action versions, token-based publishing, local builds in TestPyPI install jobs, and missing release wheel platforms.
+
+## Wheel matrix platforms
+
+pyabundance includes a Rust/PyO3 native extension, so wheels are platform-specific. Release-candidate wheels must be built and smoke-tested for:
+
+- Linux x86_64
+- macOS x86_64
+- macOS arm64
+- Windows x86_64
+
+The package may have been developed on macOS, but Linux and Windows users need platform-specific wheels. Without Linux/Windows wheels, pip may fall back to source builds requiring Rust and native build tooling.
+
+Current runner labels:
+
+- Linux x86_64: `ubuntu-latest`
+- macOS x86_64: `macos-15-intel`
+- macOS arm64: `macos-15`
+- Windows x86_64: `windows-latest`
+
+Do not use `macos-13`.
 
 ## Validation
 
 - repo hygiene: passed.
 - GitHub Actions policy check: passed.
-- cargo fmt: passed.
-- cargo test: passed, 10 Rust tests.
-- cargo clippy: passed.
 - ruff format/check: passed.
-- mypy: passed.
-- pytest: passed, 80 tests.
-- coverage: passed, 84.20% against 80% threshold.
+- pytest `tests/test_github_actions.py`: passed, 7 tests.
+- pytest `tests/test_release_engineering.py`: passed, 5 tests.
+- full pytest: passed, 83 tests.
 - docs: `mkdocs build --strict` passed.
-- benchmark generation smoke: passed; generated outputs remained ignored/untracked.
+- generated artifacts: no tracked generated artifacts; only `reports/README.md` is tracked under generated report/artifact paths.
 
 ## Decision
 
-The cleanup policy is correct. Generated benchmark artifacts should not be re-tracked. CI is ready to rerun across Python 3.11, 3.12, and 3.13.
+CI and workflow definitions are ready to rerun. The old `macos-13` wheel-matrix run should be cancelled, and the updated wheel matrix should be run before TestPyPI publishing.

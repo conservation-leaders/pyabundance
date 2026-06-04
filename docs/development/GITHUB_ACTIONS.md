@@ -11,6 +11,26 @@ pyabundance is a mixed Rust/Python package built with maturin. GitHub Actions mu
 - Wheel smoke tests install built wheels with pip and then run installed-package smoke tests.
 - TestPyPI install workflows install from TestPyPI only and do not build locally.
 
+## Wheel matrix platforms
+
+pyabundance includes a Rust/PyO3 native extension, so wheels are platform-specific. Release-candidate wheels must be built and smoke-tested for:
+
+- Linux x86_64
+- macOS x86_64
+- macOS arm64
+- Windows x86_64
+
+The package may have been developed on macOS, but Linux and Windows users need platform-specific wheels. Without Linux/Windows wheels, pip may fall back to source builds requiring Rust and native build tooling.
+
+Current runner labels:
+
+- Linux x86_64: `ubuntu-latest`
+- macOS x86_64: `macos-15-intel`
+- macOS arm64: `macos-15`
+- Windows x86_64: `windows-latest`
+
+Do not use `macos-13`.
+
 ## Workflows
 
 ### `ci.yml`

@@ -57,6 +57,26 @@ python benchmarks/compare_benchmarks.py
 
 GitHub Actions workflows should not call `maturin develop`. CI, docs, and benchmark jobs use pip editable installs (`python -m pip install -e ...`), wheel/release jobs use `maturin build`, and TestPyPI install jobs install published packages only. See `docs/development/GITHUB_ACTIONS.md`.
 
+## Wheel matrix platforms
+
+pyabundance includes a Rust/PyO3 native extension, so wheels are platform-specific. Release-candidate wheels must be built and smoke-tested for:
+
+- Linux x86_64
+- macOS x86_64
+- macOS arm64
+- Windows x86_64
+
+The package may have been developed on macOS, but Linux and Windows users need platform-specific wheels. Without Linux/Windows wheels, pip may fall back to source builds requiring Rust and native build tooling.
+
+Current runner labels:
+
+- Linux x86_64: `ubuntu-latest`
+- macOS x86_64: `macos-15-intel`
+- macOS arm64: `macos-15`
+- Windows x86_64: `windows-latest`
+
+Do not use `macos-13`.
+
 ## Hygiene check
 
 Run before committing:

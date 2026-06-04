@@ -19,9 +19,21 @@ def test_current_github_actions_workflows_pass_policy() -> None:
     assert check_workflows() == []
 
 
+def test_detects_stale_macos_13_runner_label() -> None:
+    violations = check_workflow_text(Path("wheels.yml"), "runs-on: macos-13\n")
+    assert any("macos-13" in violation.message for violation in violations)
+
+
 def test_detects_maturin_develop_in_workflow() -> None:
     violations = check_workflow_text(Path("ci.yml"), "steps:\n  - run: maturin develop\n")
     assert any("maturin develop" in violation.message for violation in violations)
+
+
+def test_detects_deprecated_upload_artifact_action() -> None:
+    violations = check_workflow_text(
+        Path("wheels.yml"), "steps:\n  - uses: actions/upload-artifact@v3\n"
+    )
+    assert any("upload-artifact@v4" in violation.message for violation in violations)
 
 
 def test_detects_testpypi_local_build() -> None:
@@ -36,3 +48,15 @@ def test_detects_publish_token_credentials() -> None:
         Path("publish-pypi.yml"), "env:\n  PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}\n"
     )
     assert any("Trusted Publishing" in violation.message for violation in violations)
+
+
+def test_wheel_workflow_requires_full_platform_matrix() -> None:
+    text = """
+    runs-on: ubuntu-latest
+    os: macos-15-intel
+    os: windows-latest
+    args: --release --out dist --compatibility pypi
+    manylinux: "2014"
+    """
+    violations = check_workflow_text(Path("wheels.yml"), text)
+    assert any("macOS arm64" in violation.message for violation in violations)
