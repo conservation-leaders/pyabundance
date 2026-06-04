@@ -36,6 +36,83 @@ def _as_named_fits(
     return out
 
 
+def _shape_or_none(value: Any) -> tuple[int, ...] | None:
+    shape = getattr(value, "shape", None)
+    if shape is None:
+        return None
+    return tuple(int(dim) for dim in shape)
+
+
+def _list_or_none(value: Any) -> list[Any] | None:
+    if value is None:
+        return None
+    try:
+        return list(value)
+    except TypeError:
+        return None
+
+
+def _compatibility_warnings(named_fits: list[tuple[str, Any]]) -> dict[str, list[str]]:
+    """Return lightweight AIC-comparison compatibility warnings by model name."""
+
+    warnings: dict[str, list[str]] = {name: [] for name, _ in named_fits}
+    if len(named_fits) <= 1:
+        return warnings
+
+    signatures: dict[str, list[tuple[str, Any]]] = {
+        "K": [(name, getattr(fit, "K", None)) for name, fit in named_fits],
+        "response_shape": [
+            (name, _shape_or_none(getattr(fit, "y", None))) for name, fit in named_fits
+        ],
+        "n_sites": [
+            (name, int(getattr(getattr(fit, "X", None), "shape", [0])[0]))
+            if getattr(fit, "X", None) is not None
+            else (name, None)
+            for name, fit in named_fits
+        ],
+        "n_visits": [
+            (name, int(getattr(getattr(fit, "W", None), "shape", [0, 0])[1]))
+            if getattr(fit, "W", None) is not None
+            else (name, None)
+            for name, fit in named_fits
+        ],
+        "site_ids": [
+            (name, _list_or_none(getattr(fit, "site_ids", None))) for name, fit in named_fits
+        ],
+        "visit_labels": [
+            (name, _list_or_none(getattr(fit, "visit_labels", None))) for name, fit in named_fits
+        ],
+        "data_info": [(name, getattr(fit, "data_info", None)) for name, fit in named_fits],
+    }
+    messages = {
+        "K": "Models use different K values; AIC comparison may be affected by truncation choices.",
+        "response_shape": (
+            "Models appear to use different response dimensions; AIC comparisons are most "
+            "meaningful for the same response data."
+        ),
+        "n_sites": (
+            "Models appear to use different site counts; AIC comparisons are most meaningful "
+            "for the same response data."
+        ),
+        "n_visits": (
+            "Models appear to use different visit counts; AIC comparisons are most meaningful "
+            "for the same response data."
+        ),
+        "site_ids": "Models have different site_ids metadata.",
+        "visit_labels": "Models have different visit_labels metadata.",
+        "data_info": "Models have different data_info metadata.",
+    }
+    for key, values in signatures.items():
+        comparable = [(name, value) for name, value in values if value is not None]
+        if len(comparable) <= 1:
+            continue
+        first_value = comparable[0][1]
+        if any(value != first_value for _, value in comparable[1:]):
+            for name, _ in comparable:
+                warnings[name].append(messages[key])
+    return warnings
+
+
 def aic_table(
     fits: Iterable[Any] | dict[str, Any],
     *,
@@ -45,9 +122,10 @@ def aic_table(
     check_compatibility: bool = True,
 ) -> pd.DataFrame:
     """Build an AIC model-selection table from fitted pyabundance models."""
-    del check_compatibility  # reserved for future compatibility checks
     rows = []
-    for name, fit in _as_named_fits(fits, names=names):
+    named = _as_named_fits(fits, names=names)
+    compatibility = _compatibility_warnings(named) if check_compatibility else {}
+    for name, fit in named:
         row = {
             "model": name,
             "mixture": fit.mixture,
@@ -62,7 +140,9 @@ def aic_table(
             "detection_formula": fit.detection_formula,
         }
         if include_warnings:
-            row["warnings"] = "; ".join(str(w) for w in (fit.warnings or []))
+            row_warnings = [str(w) for w in (fit.warnings or [])]
+            row_warnings.extend(compatibility.get(name, []))
+            row["warnings"] = "; ".join(row_warnings)
         rows.append(row)
     table = pd.DataFrame(rows)
     if sort:

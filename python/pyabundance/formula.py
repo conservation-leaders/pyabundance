@@ -199,11 +199,7 @@ def _ordered_unique_visits(obs_data: pd.DataFrame, visit_col: str) -> list[Any]:
     if isinstance(dtype, pd.CategoricalDtype) and dtype.ordered:
         present = set(series.dropna())
         return [category for category in dtype.categories.tolist() if category in present]
-    unique = series.drop_duplicates().dropna().tolist()
-    try:
-        return sorted(unique)
-    except TypeError:
-        return sorted(unique, key=str)
+    return series.dropna().drop_duplicates().tolist()
 
 
 def _resolve_visit_labels(

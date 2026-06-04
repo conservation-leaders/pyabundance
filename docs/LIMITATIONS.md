@@ -18,7 +18,6 @@ Current limitations:
 
 Users should inspect convergence, diagnostics, uncertainty warnings, and sensitivity to `K` before relying on a model for applied decisions.
 
+## Guided workflow
 
-## RC2 guided workflow note
-
-`analyze_pcount()` is the easiest entry point for common pcount analyses. `K="auto"` resolves a conservative integration limit once before fitting. `visit_labels="auto"` can infer observation visit labels when count columns and visit labels use different names.
+For the beginner-friendly guided workflow, see [Guided analysis](GUIDED_ANALYSIS.md).

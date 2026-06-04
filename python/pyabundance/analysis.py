@@ -131,10 +131,24 @@ class PCountAnalysis:
         )
         return " ".join(pieces)
 
-    def report(self) -> str:
-        return self.to_markdown()
+    def report(
+        self,
+        *,
+        include_best_model: bool = True,
+        include_posterior_abundance: bool = False,
+    ) -> str:
+        return self.to_markdown(
+            include_best_model=include_best_model,
+            include_posterior_abundance=include_posterior_abundance,
+        )
 
-    def to_markdown(self, path: str | Path | None = None) -> str:
+    def to_markdown(
+        self,
+        path: str | Path | None = None,
+        *,
+        include_best_model: bool = True,
+        include_posterior_abundance: bool = False,
+    ) -> str:
         lines = [
             "# pyabundance guided pcount analysis",
             "",
@@ -142,12 +156,60 @@ class PCountAnalysis:
             "",
             self.summary(),
             "",
+            "## Candidate models",
+            "",
+            f"- requested candidates: {len(self.data_info.get('candidate_models', []))}",
+            f"- successful candidates: {len(self.fits)}",
+            f"- failed candidates: {len(self.failed)}",
+            f"- best model: {self.best_model_name or 'none'}",
+            f"- K: {self.K}",
+            "",
             "## Explanation",
             "",
             self.explain(),
         ]
+        if self.K_info is not None:
+            lines.extend(["", "## K selection", "", self.K_info.message])
         if not self.table.empty:
             lines.extend(["", "## AIC table", "", _dataframe_to_markdown(self.table)])
+        if include_best_model and self.best_model is not None:
+            lines.extend(
+                [
+                    "",
+                    "## Best model",
+                    "",
+                    f"- name: {self.best_model_name}",
+                    f"- mixture: {self.best_model.mixture}",
+                    f"- logLik: {self.best_model.loglik:.6g}",
+                    f"- AIC: {self.best_model.aic:.6g}",
+                    "",
+                    "### Coefficients",
+                    "",
+                    _dataframe_to_markdown(self.best_model.coef_table(include_z=False)),
+                ]
+            )
+            transformed = self.best_model.transformed_params()
+            if not transformed.empty:
+                lines.extend(
+                    ["", "### Transformed parameters", "", _dataframe_to_markdown(transformed)]
+                )
+        if include_posterior_abundance and self.best_model is not None:
+            posterior_summary = self.best_model.posterior_abundance_summary()
+            assert isinstance(posterior_summary, pd.DataFrame)
+            posterior = posterior_summary.head(10)
+            lines.extend(
+                [
+                    "",
+                    "## Posterior abundance",
+                    "",
+                    "Posterior abundance summaries condition on fitted parameters and do not "
+                    "include full parameter uncertainty.",
+                    "",
+                    "First 10 site-level summaries:",
+                    "",
+                    _dataframe_to_markdown(posterior),
+                ]
+            )
         if self.failed:
             lines.extend(["", "## Failed models", ""])
             for name, failure in self.failed.items():
@@ -159,8 +221,18 @@ class PCountAnalysis:
             Path(path).write_text(text, encoding="utf-8")
         return text
 
-    def export_report(self, path: str | Path) -> None:
-        self.to_markdown(path)
+    def export_report(
+        self,
+        path: str | Path,
+        *,
+        include_best_model: bool = True,
+        include_posterior_abundance: bool = False,
+    ) -> None:
+        self.to_markdown(
+            path,
+            include_best_model=include_best_model,
+            include_posterior_abundance=include_posterior_abundance,
+        )
 
     def to_json(self, path: str | Path | None = None) -> str:
         payload = {
@@ -200,6 +272,22 @@ def _candidate_mixtures(mixtures: Iterable[str], fit_zip: bool) -> list[tuple[st
     return out
 
 
+def _start_for_candidate(start: Any, *, mixture: str, n_candidates: int) -> Any:
+    if start is None:
+        return None
+    if isinstance(start, dict):
+        starts_by_mixture: dict[str, Any] = {}
+        for key, value in start.items():
+            starts_by_mixture[canonical_mixture(str(key))] = value
+        return starts_by_mixture.get(mixture)
+    if n_candidates == 1:
+        return start
+    raise ValueError(
+        "analyze_pcount received one start vector for multiple mixtures. Pass start as a "
+        "dict keyed by mixture name, or use start=None."
+    )
+
+
 def analyze_pcount(
     *,
     site_data: pd.DataFrame,
@@ -223,6 +311,11 @@ def analyze_pcount(
     """Run a guided pcount analysis with candidate models, AIC comparison, and report UX."""
 
     candidates = _candidate_mixtures(mixtures, fit_zip=fit_zip)
+    if start is not None and not isinstance(start, dict) and len(candidates) > 1:
+        raise ValueError(
+            "analyze_pcount received one start vector for multiple mixtures. Pass start as a "
+            "dict keyed by mixture name, or use start=None."
+        )
     matrices = build_pcount_matrices(
         site_data=site_data,
         count_cols=count_cols,
@@ -258,7 +351,7 @@ def analyze_pcount(
                 matrices.W,
                 K=K_int,
                 mixture=mixture,
-                start=start,
+                start=_start_for_candidate(start, mixture=mixture, n_candidates=len(candidates)),
                 method=method,
                 se=se,
                 cov_method=cov_method,

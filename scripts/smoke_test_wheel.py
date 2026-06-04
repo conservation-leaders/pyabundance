@@ -28,6 +28,7 @@ def _install_wheel(path: Path) -> None:
 def _smoke(expected_version: str | None = None) -> None:
     from pyabundance import (
         __version__,
+        analyze_pcount,
         compare_models,
         load_example_pcount,
         pcount_df,
@@ -53,8 +54,23 @@ def _smoke(expected_version: str | None = None) -> None:
     assert fit1.success, fit1.message
     assert fit1.posterior_abundance().shape == (25, data.K + 1)
     assert fit1.ranef().shape[0] == 25
+    assert fit1.coef_table(as_dataframe=True).shape[0] == fit1.params.size
     comparison = compare_models({"covariate": fit1, "intercept": fit2})
     assert comparison.table.shape[0] == 2
+    named_comparison = compare_models([fit1, fit2], names=["covariate", "intercept"])
+    assert named_comparison.table.shape[0] == 2
+    analysis = analyze_pcount(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula=data.abundance_formula,
+        detection_formula=data.detection_formula,
+        K="auto",
+        se=False,
+    )
+    assert analysis.best_model is not None
+    assert analysis.best_model_name in analysis.fits
     print(f"pyabundance {__version__} wheel smoke test passed")
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import pytest
 from pyabundance import PCountAnalysis, analyze_pcount, load_example_pcount
 
 
@@ -38,3 +39,56 @@ def test_analyze_pcount_failed_model_handling_with_too_small_k():
     assert analysis.failed
     assert not analysis.fits
     assert analysis.best_model_name is None
+
+
+def test_analyze_pcount_single_start_vector_allowed_for_one_mixture():
+    data = load_example_pcount("poisson", n_sites=12)
+    analysis = analyze_pcount(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula="~ 1",
+        detection_formula="~ 1",
+        mixtures=("poisson",),
+        K="auto",
+        start=np.zeros(2),
+        se=False,
+    )
+    assert set(analysis.fits) == {"poisson"}
+
+
+def test_analyze_pcount_single_start_vector_rejected_for_multiple_mixtures():
+    data = load_example_pcount("poisson", n_sites=12)
+    with pytest.raises(ValueError, match="one start vector for multiple mixtures"):
+        analyze_pcount(
+            site_data=data.site_data,
+            obs_data=data.obs_data,
+            site_id_col="site_id",
+            count_cols=data.count_cols,
+            abundance_formula="~ 1",
+            detection_formula="~ 1",
+            mixtures=("poisson", "negative_binomial"),
+            K="auto",
+            start=np.zeros(2),
+            se=False,
+        )
+
+
+def test_analyze_pcount_start_dict_accepts_aliases_and_missing_keys():
+    data = load_example_pcount("poisson", n_sites=12)
+    analysis = analyze_pcount(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula="~ 1",
+        detection_formula="~ 1",
+        mixtures=("poisson", "negative_binomial", "zero_inflated_poisson"),
+        K="auto",
+        start={"P": np.zeros(2), "NB": np.zeros(3)},
+        se=False,
+    )
+    assert {"poisson", "negative_binomial", "zero_inflated_poisson"}.issubset(
+        set(analysis.fits) | set(analysis.failed)
+    )
