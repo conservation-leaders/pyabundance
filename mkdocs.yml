@@ -31,6 +31,7 @@ nav:
       - Clean-room Policy: development/CLEAN_ROOM_POLICY.md
       - Repository Hygiene: development/REPOSITORY_HYGIENE.md
       - Performance Architecture: development/PERFORMANCE_ARCHITECTURE.md
+      - Shared Core Architecture: development/SHARED_CORE_ARCHITECTURE.md
       - GitHub Actions: development/GITHUB_ACTIONS.md
       - GitHub Actions Stabilization: development/GITHUB_ACTIONS_STABILIZATION.md
       - Cleanup Inventory: development/CLEANUP_INVENTORY.md
