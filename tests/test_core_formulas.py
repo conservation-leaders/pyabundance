@@ -68,9 +68,7 @@ def test_build_p_observation_design_without_intercept():
 def test_build_process_designs_for_pcount_like_process_mapping():
     processes = {
         "lambda": ProcessSpec(name="lambda", formula="~ forest", link="log", level="site"),
-        "p": ProcessSpec(
-            name="p", formula="~ visit - 1", link="logit", level="observation"
-        ),
+        "p": ProcessSpec(name="p", formula="~ visit - 1", link="logit", level="observation"),
     }
 
     designs = build_process_designs(

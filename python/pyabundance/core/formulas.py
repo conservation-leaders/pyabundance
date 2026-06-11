@@ -150,8 +150,7 @@ def build_process_designs(
             )
         if spec.level not in data_by_level:
             raise ValueError(
-                f"missing data for process level {spec.level!r} "
-                f"needed by process {name!r}"
+                f"missing data for process level {spec.level!r} needed by process {name!r}"
             )
         designs[name] = build_process_design(spec, data_by_level[spec.level])
     return designs
