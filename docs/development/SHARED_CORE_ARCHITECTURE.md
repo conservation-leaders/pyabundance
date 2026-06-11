@@ -36,6 +36,14 @@ requests to existing `PCountResult` prediction methods. It is intentionally
 small: it does not add new prediction math, does not replace pcount-specific
 methods, and supports existing-data pcount predictions only.
 
+Stage 5 adds an experimental `FitList` wrapper in `pyabundance.core` for ordered
+collections of already-fitted models. `FitList` is a convenience wrapper around
+existing results and the existing `aic_table`/`compare_models` APIs; it is not a
+replacement for those APIs. It can optionally call shared-core `predict` for one
+selected model, defaulting to the current lowest-AIC model, but it does not
+perform model averaging, ensemble prediction, stacking weights, refitting, or
+formula/newdata prediction.
+
 ## Core concepts
 
 ### `ProcessSpec`
@@ -86,6 +94,27 @@ negative-binomial `r` and ZIP `psi` when a design is explicitly requested.
 ### `LikelihoodProblemProtocol`
 
 `LikelihoodProblemProtocol` is the minimal likelihood-problem surface: an object with `loglik(theta) -> float`.
+
+### `FitList`
+
+`FitList` is an experimental ordered container for collections of fitted model
+results. It can be constructed from a mapping of names to fits or from an
+iterable of fits plus optional names. Names are normalized to strings and must be
+unique, and model insertion order is preserved.
+
+The methods `FitList.aic_table(...)` and `FitList.compare(...)` delegate to the
+existing `pyabundance.model_selection.aic_table` and `compare_models` functions,
+so existing model-selection behavior remains the source of truth. Convenience
+properties `best_model_name` and `best_model` use the default delegated AIC
+table. `FitList.summary()` delegates to the existing `ModelComparison.summary()`
+format.
+
+`FitList.predict(type=..., model=...)` is intentionally narrow. It selects one
+model by name, or the default `best_model` when omitted, and delegates to
+`pyabundance.core.predict`. It does not aggregate predictions across models and
+does not implement model averaging, refitting, stacking, ensemble prediction,
+Stage 8 pcount formula newdata prediction, occupancy, distance sampling, open
+population, dynamic, or other new ecological model families.
 
 ### `predict(result, type=...)`
 
@@ -149,7 +178,7 @@ This stage intentionally does not add or implement:
 - a new ecological model family;
 - occupancy (`occu`);
 - formula/newdata prediction;
-- generic fit-list/model-selection containers;
+- model averaging, refitting, stacking, or ensemble prediction;
 - new likelihoods;
 - changes to Rust likelihood formulas or hot paths;
 - changes to the stable pcount public API.
@@ -159,6 +188,5 @@ This stage intentionally does not add or implement:
 Planned follow-up work can build on this metadata layer with:
 
 1. shared pcount formula/newdata prediction built on process designs;
-2. a shared `FitList`/model comparison foundation;
-3. validation fixtures for cross-family parity checks;
-4. future model families such as `occu` once the shared foundation is proven.
+2. validation fixtures for cross-family parity checks;
+3. future model families such as `occu` once the shared foundation is proven.
