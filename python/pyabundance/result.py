@@ -13,6 +13,17 @@ from pyabundance import _core
 MixtureName = Literal["poisson", "negative_binomial", "zero_inflated_poisson"]
 
 
+def _unique_preserving_order(values: list[Any]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for value in values:
+        text = str(value)
+        if text not in seen:
+            out.append(text)
+            seen.add(text)
+    return out
+
+
 def _logistic_array(x: NDArray[np.float64]) -> NDArray[np.float64]:
     return np.where(x >= 0.0, 1.0 / (1.0 + np.exp(-x)), np.exp(x) / (1.0 + np.exp(x)))
 
@@ -573,12 +584,17 @@ class PCountResult:
         return result_diagnostics(self)
 
     def warning_summary(self) -> str:
-        warnings = list(self.warnings or [])
-        cov_warnings = (self.covariance_diagnostics or {}).get("warnings", [])
-        warnings.extend(str(w) for w in cov_warnings)
-        if not warnings:
+        warnings = _unique_preserving_order(list(self.warnings or []))
+        cov_warnings = _unique_preserving_order(
+            list((self.covariance_diagnostics or {}).get("warnings", []))
+        )
+        lines = [f"- {warning}" for warning in warnings]
+        lines.extend(
+            f"- covariance: {warning}" for warning in cov_warnings if warning not in warnings
+        )
+        if not lines:
             return "No warnings."
-        return "\n".join(f"- {warning}" for warning in warnings)
+        return "\n".join(lines)
 
     def parametric_bootstrap(self, *args: Any, **kwargs: Any):
         from pyabundance.bootstrap import parametric_bootstrap
@@ -661,9 +677,12 @@ class PCountResult:
             lines.extend([f"log_r: {self.log_r:.6g}", f"r: {self.r:.6g}"])
         if self.mixture == "zero_inflated_poisson":
             lines.extend([f"logit_psi: {self.logit_psi:.6g}", f"psi: {self.psi:.6g}"])
-        cov_warnings = (self.covariance_diagnostics or {}).get("warnings", [])
+        cov_warnings = _unique_preserving_order(
+            list((self.covariance_diagnostics or {}).get("warnings", []))
+        )
         if cov_warnings:
             lines.append("covariance warnings: " + "; ".join(str(w) for w in cov_warnings))
         if self.warnings:
-            lines.append("warnings: " + "; ".join(str(w) for w in self.warnings))
+            model_warnings = _unique_preserving_order(list(self.warnings))
+            lines.append("warnings: " + "; ".join(str(w) for w in model_warnings))
         return "\n".join(lines)

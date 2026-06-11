@@ -44,6 +44,8 @@ analysis.export_report("abundance_report.md")
 
 `explain()` is rule-based text, not AI-generated interpretation. It reports the lowest-AIC model, flags overdispersion or ZIP identifiability cautions when relevant, and reminds users that posterior abundance summaries condition on fitted parameters.
 
+`mixtures` may be a single string, such as `mixtures="poisson"`, or an iterable of mixture names. Aliases such as `"P"` are canonicalized before fitting. `analysis.to_json()` exports structured `K_info` fields when `K="auto"` so downstream tools can read the selected `K`, max observed count, buffer, multiplier, and message directly.
+
 ## Visit label safety
 
 When `obs_data` is provided, `visit_labels="auto"` is conservative. If observation visit labels match `count_cols`, count columns define the order. If observation visit labels differ from `count_cols`, auto-inference requires `obs_data[visit_col]` to be an ordered pandas Categorical. Otherwise pass explicit `visit_labels` in the order matching `count_cols`. This avoids silently pairing count columns with observation covariates in the wrong visit order.

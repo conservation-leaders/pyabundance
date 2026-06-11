@@ -58,6 +58,40 @@ def test_analyze_pcount_single_start_vector_allowed_for_one_mixture():
     assert set(analysis.fits) == {"poisson"}
 
 
+def test_analyze_pcount_single_string_mixture_is_one_candidate():
+    data = load_example_pcount("poisson", n_sites=12)
+    analysis = analyze_pcount(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula="~ 1",
+        detection_formula="~ 1",
+        mixtures="poisson",
+        K="auto",
+        se=False,
+    )
+    assert set(analysis.fits) == {"poisson"}
+    assert analysis.best_model_name == "poisson" or analysis.best_model_name in analysis.fits
+
+
+def test_analyze_pcount_single_string_mixture_alias_is_canonicalized():
+    data = load_example_pcount("poisson", n_sites=12)
+    analysis = analyze_pcount(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula="~ 1",
+        detection_formula="~ 1",
+        mixtures="P",
+        K="auto",
+        se=False,
+    )
+    assert set(analysis.fits) == {"poisson"}
+    assert analysis.model("poisson").mixture == "poisson"
+
+
 def test_analyze_pcount_single_start_vector_rejected_for_multiple_mixtures():
     data = load_example_pcount("poisson", n_sites=12)
     with pytest.raises(ValueError, match="one start vector for multiple mixtures"):

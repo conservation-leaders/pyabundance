@@ -64,9 +64,10 @@ class PCountAnalysis:
         return self.best_model.posterior_abundance_summary(**kwargs)
 
     def warning_summary(self) -> str:
-        if not self.warnings:
+        warnings = _unique_preserving_order(self.warnings)
+        if not warnings:
             return "No warnings."
-        return "\n".join(f"- {warning}" for warning in self.warnings)
+        return "\n".join(f"- {warning}" for warning in warnings)
 
     def summary(self) -> str:
         lines = [
@@ -88,7 +89,7 @@ class PCountAnalysis:
             lines.extend(["", "Warnings:", self.warning_summary()])
         return "\n".join(lines)
 
-    def explain(self) -> str:
+    def explain(self, *, include_k_info: bool = True) -> str:
         if self.best_model_name is None:
             return (
                 "No candidate model fitted successfully. Inspect failed model messages and data "
@@ -120,7 +121,7 @@ class PCountAnalysis:
                 + ", ".join(self.failed.keys())
                 + "."
             )
-        if self.K_info is not None:
+        if include_k_info and self.K_info is not None:
             pieces.append(self.K_info.message)
         pieces.append(
             "Posterior abundance summaries condition on fitted parameters and should be "
@@ -149,12 +150,25 @@ class PCountAnalysis:
         include_best_model: bool = True,
         include_posterior_abundance: bool = False,
     ) -> str:
+        warnings = _report_warnings(
+            self.warnings,
+            k_message=self.K_info.message if self.K_info is not None else None,
+            failed=self.failed,
+        )
         lines = [
             "# pyabundance guided pcount analysis",
             "",
             "## Summary",
             "",
-            self.summary(),
+            f"- sites: {self.data_info.get('n_sites')}",
+            f"- visits: {self.data_info.get('n_visits')}",
+            f"- K: {self.K}",
+            f"- successful models: {', '.join(self.fits) if self.fits else 'none'}",
+            f"- failed models: {', '.join(self.failed) if self.failed else 'none'}",
+            f"- best model: {self.best_model_name or 'none'}",
+            f"- abundance formula: `{self.abundance_formula}`",
+            f"- detection formula: `{self.detection_formula}`",
+            f"- visit labels: {self.visit_labels}",
             "",
             "## Candidate models",
             "",
@@ -166,12 +180,13 @@ class PCountAnalysis:
             "",
             "## Explanation",
             "",
-            self.explain(),
+            self.explain(include_k_info=False),
         ]
         if self.K_info is not None:
             lines.extend(["", "## K selection", "", self.K_info.message])
         if not self.table.empty:
-            lines.extend(["", "## AIC table", "", _dataframe_to_markdown(self.table)])
+            report_table = self.table.drop(columns=["warnings"], errors="ignore")
+            lines.extend(["", "## AIC table", "", _dataframe_to_markdown(report_table)])
         if include_best_model and self.best_model is not None:
             lines.extend(
                 [
@@ -214,8 +229,9 @@ class PCountAnalysis:
             lines.extend(["", "## Failed models", ""])
             for name, failure in self.failed.items():
                 lines.append(f"- {name}: {failure}")
-        if self.warnings:
-            lines.extend(["", "## Warnings", "", self.warning_summary()])
+        if warnings:
+            lines.extend(["", "## Warnings", ""])
+            lines.extend(f"- {warning}" for warning in warnings)
         text = "\n".join(lines) + "\n"
         if path is not None:
             Path(path).write_text(text, encoding="utf-8")
@@ -237,7 +253,7 @@ class PCountAnalysis:
     def to_json(self, path: str | Path | None = None) -> str:
         payload = {
             "K": self.K,
-            "K_info": self.K_info,
+            "K_info": _k_info_to_json(self.K_info),
             "count_cols": self.count_cols,
             "visit_labels": self.visit_labels,
             "abundance_formula": self.abundance_formula,
@@ -254,9 +270,59 @@ class PCountAnalysis:
         return text
 
 
-def _candidate_mixtures(mixtures: Iterable[str], fit_zip: bool) -> list[tuple[str, str]]:
+def _unique_preserving_order(values: Iterable[Any]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for value in values:
+        text = str(value)
+        if text not in seen:
+            out.append(text)
+            seen.add(text)
+    return out
+
+
+def _append_unique(values: list[str], warning: str) -> None:
+    if warning not in values:
+        values.append(warning)
+
+
+def _report_warnings(
+    warnings: Iterable[str],
+    *,
+    k_message: str | None,
+    failed: dict[str, Any],
+) -> list[str]:
+    out = []
+    for warning in _unique_preserving_order(warnings):
+        if k_message is not None and warning == k_message:
+            continue
+        if any(
+            warning in {f"{name}: {failure}", f"{name} failed: {failure}"}
+            or warning.startswith(f"{name} failed:")
+            or warning.startswith(f"{name} convergence warning:")
+            for name, failure in failed.items()
+        ):
+            continue
+        out.append(warning)
+    return out
+
+
+def _k_info_to_json(value: KSuggestion | None) -> dict[str, Any] | None:
+    if value is None:
+        return None
+    return {
+        "K": int(value.K),
+        "max_observed": int(value.max_observed),
+        "minimum_buffer": int(value.minimum_buffer),
+        "multiplier": float(value.multiplier),
+        "message": str(value.message),
+    }
+
+
+def _candidate_mixtures(mixtures: str | Iterable[str], fit_zip: bool) -> list[tuple[str, str]]:
     out: list[tuple[str, str]] = []
-    for mixture in mixtures:
+    mixture_iterable = [mixtures] if isinstance(mixtures, str) else mixtures
+    for mixture in mixture_iterable:
         canonical = canonical_mixture(str(mixture))
         if canonical == "zero_inflated_poisson" and not fit_zip:
             continue
@@ -298,7 +364,7 @@ def analyze_pcount(
     site_id_col: str | None = None,
     visit_col: str = "visit",
     visit_labels: list[Any] | str | None = "auto",
-    mixtures: Iterable[str] = ("poisson", "negative_binomial", "zero_inflated_poisson"),
+    mixtures: str | Iterable[str] = ("poisson", "negative_binomial", "zero_inflated_poisson"),
     K: int | str = "auto",
     se: bool = True,
     cov_method: str | None = "bfgs",
@@ -384,8 +450,12 @@ def analyze_pcount(
         best_model = fits[best_model_name]
         for name, fit in fits.items():
             for warning in fit.warnings or []:
-                if warning not in warnings:
-                    warnings.append(f"{name}: {warning}")
+                if warning in warnings:
+                    continue
+                _append_unique(warnings, f"{name}: {warning}")
+            for warning in (fit.covariance_diagnostics or {}).get("warnings", []):
+                prefixed = f"{name} covariance: {warning}"
+                _append_unique(warnings, prefixed)
     else:
         table = pd.DataFrame(
             columns=[

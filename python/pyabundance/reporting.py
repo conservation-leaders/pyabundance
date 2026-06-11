@@ -18,6 +18,17 @@ def _json_default(value: Any) -> Any:
     return str(value)
 
 
+def _unique_preserving_order(values: list[Any]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
+    for value in values:
+        text = str(value)
+        if text not in seen:
+            out.append(text)
+            seen.add(text)
+    return out
+
+
 def model_report(fit: Any, *, include_posterior_abundance: bool = False) -> dict[str, Any]:
     """Return a JSON-serializable report dictionary for a fitted model."""
     report = {
@@ -104,11 +115,23 @@ def report_markdown(fit: Any, *, include_posterior_abundance: bool = False) -> s
                 _dataframe_to_markdown(site_summary),
             ]
         )
-    warnings = fit.warnings or []
-    cov_warnings = (fit.covariance_diagnostics or {}).get("warnings", [])
+    warnings = _unique_preserving_order(list(fit.warnings or []))
+    cov_warnings = _unique_preserving_order(
+        list((fit.covariance_diagnostics or {}).get("warnings", []))
+    )
     if warnings or cov_warnings:
         lines.extend(["", "## Warnings", ""])
-        lines.extend(f"- {warning}" for warning in [*warnings, *cov_warnings])
+        if warnings:
+            lines.append("### Model warnings")
+            lines.append("")
+            lines.extend(f"- {warning}" for warning in warnings)
+        unique_cov_warnings = [warning for warning in cov_warnings if warning not in warnings]
+        if unique_cov_warnings:
+            if warnings:
+                lines.append("")
+            lines.append("### Covariance warnings")
+            lines.append("")
+            lines.extend(f"- {warning}" for warning in unique_cov_warnings)
     return "\n".join(lines) + "\n"
 
 
