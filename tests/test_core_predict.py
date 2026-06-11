@@ -83,21 +83,21 @@ def test_unsupported_result_object_has_clear_error():
         predict(object(), type="lambda")
 
 
-def test_newdata_style_prediction_requests_are_rejected():
+def test_matrix_fit_newdata_prediction_requests_require_formula_metadata():
     fit = _matrix_fit()
 
     for name in ["newdata", "new_site_data", "new_obs_data"]:
-        with pytest.raises(ValueError, match="not implemented yet"):
+        with pytest.raises(ValueError, match="formula metadata is required"):
             predict(fit, type="lambda", **{name: object()})
 
 
-def test_matrix_newdata_prediction_requests_are_rejected_by_generic_dispatch():
+def test_matrix_design_prediction_requests_can_route_without_newdata():
     fit = _matrix_fit()
 
-    with pytest.raises(ValueError, match="existing-data predictions only"):
-        predict(fit, type="lambda", X=fit.X.copy())
-    with pytest.raises(ValueError, match="existing-data predictions only"):
-        predict(fit, type="detection", W=fit.W.copy())
+    np.testing.assert_allclose(predict(fit, type="lambda", X=fit.X.copy()), fit.predict_lambda())
+    np.testing.assert_allclose(
+        predict(fit, type="detection", W=fit.W.copy()), fit.predict_detection()
+    )
 
 
 def test_existing_pcount_prediction_methods_still_work_unchanged():

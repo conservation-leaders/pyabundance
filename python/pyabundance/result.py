@@ -255,8 +255,7 @@ class PCountResult:
         """Experimental generic prediction dispatch for this pcount fit.
 
         Existing pcount prediction methods remain the stable API. This method
-        delegates to :func:`pyabundance.core.predict` and currently supports
-        existing-data pcount prediction types only.
+        delegates to :func:`pyabundance.core.predict`.
         """
 
         from pyabundance.core.predict import predict
@@ -404,11 +403,30 @@ class PCountResult:
         self,
         X: NDArray[np.float64] | None = None,
         *,
+        newdata: Any = None,
+        new_site_data: Any = None,
+        site_id_col: str | None = None,
         se: bool = False,
         interval: bool = False,
         level: float = 0.95,
         as_dataframe: bool = False,
     ) -> NDArray[np.float64] | dict[str, NDArray[np.float64]] | pd.DataFrame:
+        if newdata is not None or new_site_data is not None:
+            if X is not None:
+                raise ValueError("pass either X or new_site_data/newdata, not both")
+            from pyabundance.prediction import predict_pcount_formula_newdata
+
+            return predict_pcount_formula_newdata(
+                self,
+                "lambda",
+                newdata=newdata,
+                new_site_data=new_site_data,
+                site_id_col=site_id_col,
+                se=se,
+                interval=interval,
+                level=level,
+                as_dataframe=as_dataframe,
+            )
         x_arr = self.X if X is None else np.ascontiguousarray(X, dtype=np.float64)
         values = np.asarray(_core.pcount_poisson_predict_lambda(x_arr, self.beta), dtype=np.float64)
         if not se and not interval:
@@ -443,22 +461,73 @@ class PCountResult:
             return pd.DataFrame(interval_data)[columns]
         return out
 
-    def predict_abundance(self, new_site_data: Any = None) -> NDArray[np.float64]:
+    def predict_abundance(
+        self,
+        new_site_data: Any = None,
+        *,
+        newdata: Any = None,
+        site_id_col: str | None = None,
+        as_dataframe: bool = False,
+    ) -> NDArray[np.float64] | pd.DataFrame:
         if new_site_data is not None:
-            raise NotImplementedError(
-                "new data prediction from formulas is not implemented in v0.5"
+            from pyabundance.prediction import predict_pcount_formula_newdata
+
+            return predict_pcount_formula_newdata(
+                self,
+                "abundance",
+                newdata=newdata,
+                new_site_data=new_site_data,
+                site_id_col=site_id_col,
+                as_dataframe=as_dataframe,
             )
+        if newdata is not None:
+            from pyabundance.prediction import predict_pcount_formula_newdata
+
+            return predict_pcount_formula_newdata(
+                self,
+                "abundance",
+                newdata=newdata,
+                site_id_col=site_id_col,
+                as_dataframe=as_dataframe,
+            )
+        if as_dataframe:
+            return self.predict_lambda(as_dataframe=True)
         return np.asarray(self.predict_lambda(), dtype=np.float64)
 
     def predict_detection(
         self,
         W: NDArray[np.float64] | None = None,
         *,
+        newdata: Any = None,
+        new_site_data: Any = None,
+        new_obs_data: Any = None,
+        site_id_col: str | None = None,
+        visit_col: str = "visit",
+        visit_labels: list[Any] | str | None = None,
         se: bool = False,
         interval: bool = False,
         level: float = 0.95,
         as_dataframe: bool = False,
     ) -> NDArray[np.float64] | dict[str, NDArray[np.float64]] | pd.DataFrame:
+        if newdata is not None or new_site_data is not None or new_obs_data is not None:
+            if W is not None:
+                raise ValueError("pass either W or new_site_data/new_obs_data/newdata, not both")
+            from pyabundance.prediction import predict_pcount_formula_newdata
+
+            return predict_pcount_formula_newdata(
+                self,
+                "detection",
+                newdata=newdata,
+                new_site_data=new_site_data,
+                new_obs_data=new_obs_data,
+                site_id_col=site_id_col,
+                visit_col=visit_col,
+                visit_labels=visit_labels,
+                se=se,
+                interval=interval,
+                level=level,
+                as_dataframe=as_dataframe,
+            )
         w_arr = self.W if W is None else np.ascontiguousarray(W, dtype=np.float64)
         values = np.asarray(
             _core.pcount_poisson_predict_detection(w_arr, self.detection), dtype=np.float64

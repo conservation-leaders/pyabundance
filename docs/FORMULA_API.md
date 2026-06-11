@@ -87,6 +87,73 @@ print(matrices.abundance_column_names)
 print(matrices.detection_column_names)
 ```
 
+## Predicting on new data
+
+Formula newdata prediction is supported for fitted `pcount_df()` models. The
+fit stores the abundance and detection formulas, then reuses them to build
+compatible design matrices for new site and observation data.
+
+```python
+new_sites = pd.DataFrame(
+    {
+        "site_id": ["new-1", "new-2"],
+        "forest": [0.2, 0.8],
+    }
+)
+
+new_obs = pd.DataFrame(
+    {
+        "site_id": ["new-1", "new-1", "new-2", "new-2"],
+        "visit": ["v1", "v2", "v1", "v2"],
+        "wind": [0.1, 0.3, 0.2, 0.4],
+    }
+)
+
+lambda_hat = fit.predict(type="lambda", new_site_data=new_sites)
+p_hat = fit.predict(type="detection", new_site_data=new_sites, new_obs_data=new_obs)
+fitted_counts = fit.predict(type="fitted", new_site_data=new_sites, new_obs_data=new_obs)
+```
+
+The shared-core dispatcher accepts the same arguments:
+
+```python
+from pyabundance.core import predict
+
+predict(fit, type="lambda", new_site_data=new_sites)
+predict(fit, type="p", new_site_data=new_sites, new_obs_data=new_obs)
+```
+
+`type="lambda"` and `type="abundance"` produce one row per `new_site_data` row.
+`type="p"`/`"detection"` and `type="fitted"` produce an
+`n_new_sites × n_visits` array. Use `as_dataframe=True` for labeled lambda and
+detection outputs.
+
+For detection prediction, `new_obs_data` is long format with one row per
+site × visit. By default pyabundance uses:
+
+- `site_id_col="site_id"` when that column is present in `new_site_data`;
+- `visit_col="visit"`;
+- `visit_labels=fit.visit_labels`.
+
+You can override these with `site_id_col=...`, `visit_col=...`, and
+`visit_labels=[...]`. If `new_obs_data` is omitted, pyabundance generates
+default observation rows by crossing `new_site_data` with the resolved visit
+labels and carrying site covariates into the observation-level formula. This is
+useful when the detection formula uses `visit` and/or site-level covariates.
+
+Matrix fits created with `pcount(y, X, W, ...)` do not have formula metadata for
+newdata prediction. Continue to use matrix methods for those fits:
+
+```python
+fit.predict_lambda(X=new_X)
+fit.predict_detection(W=new_W)
+```
+
+Requests for formula newdata from matrix fits raise a formula-metadata-required
+error. Stage 7 does not include Stage 8 parity helpers or new model families.
+Formula newdata prediction cannot be combined with explicit matrix-design
+arguments (`X` or `W`) in the same generic `predict()` request.
+
 ## Current limitations
 
 - no response-side formulas;
@@ -95,7 +162,8 @@ print(matrices.detection_column_names)
 - no smooths or splines;
 - no dynamic/open N-mixture models;
 - no spatial models;
-- formulas are used only to build fixed-effect design matrices.
+- formulas are used only to build fixed-effect design matrices and pcount
+  formula newdata predictions.
 
 Unsupported formula features raise `ValueError` with a v0.4 limitation message.
 

@@ -56,6 +56,18 @@ downloads; any R/`unmarked` comparison remains optional/manual and black-box
 only. Generated validation outputs, reports, benchmark files, coverage outputs,
 wheels, Mallard data, and Mallard results must not be committed.
 
+Stage 7 adds formula-based newdata prediction for existing fitted `pcount_df`
+results. It uses the formulas and process metadata stored on `PCountResult` to
+build new abundance (`lambda`) and detection (`p`) design matrices, validates
+that their Formulaic columns match the fitted columns, and delegates numerical
+prediction to the existing matrix prediction methods. Matrix-based fits without
+formula metadata continue to use existing-data prediction and direct `X`/`W`
+prediction only; requesting formula newdata from such fits raises a clear
+formula-metadata-required error. Stage 7 changes Python prediction plumbing only:
+no Rust likelihood formulas, Rust likelihood hot paths, new ecological model
+families, `occu`, dynamic/open models, K sensitivity helpers, generic simulate
+facades, generic parboot facades, or Stage 8 parity helpers are included.
+
 ## Core concepts
 
 ### `ProcessSpec`
@@ -133,8 +145,8 @@ population, dynamic, or other new ecological model families.
 `predict` is an experimental shared-core dispatch function. It identifies a
 fitted result through `result.model_spec.model` when available, chooses a
 registered handler for that model family, and delegates the request to existing
-model-specific prediction methods. The initial Stage 4 handler supports pcount
-results only.
+model-specific prediction methods. The current handler supports pcount results
+only.
 
 Supported pcount prediction types are:
 
@@ -152,9 +164,38 @@ same shared-core dispatch. The existing pcount methods remain the stable API:
 `predict_lambda`, `predict_abundance`, `predict_detection`, `fitted_counts`,
 and the DataFrame helper methods are not removed or renamed.
 
-Formula/newdata prediction is not implemented in Stage 4. Requests using
-`newdata`, `new_site_data`, or `new_obs_data` are rejected with a clear "not
-implemented yet" error until a later stage adds pcount formula newdata support.
+For formula-based pcount fits created with `pcount_df`, Stage 7 also supports
+newdata prediction through `PCountResult.predict(...)` and
+`pyabundance.core.predict(...)`:
+
+- `type="lambda"` and `type="abundance"` require `new_site_data` (or
+  unambiguous alias `newdata`) as a pandas `DataFrame` and return one prediction
+  per new site.
+- `type="p"` and `type="detection"` require `new_site_data` and either
+  long-format `new_obs_data` or visit labels that allow default observation rows
+  to be generated. The detection design tensor has shape
+  `n_new_sites × n_visits × n_detection_params`.
+- `type="fitted"` combines new latent mean predictions with new detection
+  predictions using the existing fitted-count semantics. For ZIP fits, the
+  latent mean uses the existing `lambda * (1 - psi)` behavior; negative-binomial
+  fits use the existing latent mean.
+
+The newdata path accepts `site_id_col`, `visit_col` (default `"visit"`), and
+`visit_labels` (defaulting to `fit.visit_labels` when available). Explicit
+`new_obs_data` must contain one row for every requested site × visit, no
+duplicates, no unknown sites, and no unknown visits. If `new_obs_data` is
+omitted, pyabundance generates observation rows by crossing the new sites with
+the resolved visit labels and carrying site covariates into the observation
+design. Missing covariates, unavailable formulas, missing site × visit rows, and
+design-column mismatches raise `ValueError` with targeted messages.
+
+Matrix fits without formulas do not gain formula newdata prediction. They may
+continue to call the existing matrix prediction methods directly, such as
+`fit.predict_lambda(X=...)` and `fit.predict_detection(W=...)`, or the generic
+dispatch where the matrix argument maps unambiguously to the requested type.
+Stage 7 does not add standard errors or intervals for fitted newdata products;
+lambda and detection newdata use the existing `X`/`W` uncertainty support when
+available.
 
 Shared-core spec objects are intended to be stable metadata snapshots for fitted results.
 They defensively copy and freeze mapping metadata at construction time, including model
@@ -189,7 +230,10 @@ This stage intentionally does not add or implement:
 
 - a new ecological model family;
 - occupancy (`occu`);
-- formula/newdata prediction;
+- formula/newdata prediction beyond pcount fits created with `pcount_df`;
+- Stage 8 parity helpers;
+- K sensitivity helpers;
+- generic simulate or parboot facades;
 - model averaging, refitting, stacking, or ensemble prediction;
 - new likelihoods;
 - changes to Rust likelihood formulas or hot paths;
@@ -199,6 +243,6 @@ This stage intentionally does not add or implement:
 
 Planned follow-up work can build on this metadata layer with:
 
-1. shared pcount formula/newdata prediction built on process designs;
+1. Stage 8 pcount parity helpers where separately approved;
 2. future validation fixtures for additional shared-core surfaces where needed;
 3. future model families such as `occu` once the shared foundation is proven.
