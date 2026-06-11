@@ -22,6 +22,13 @@ stable pcount APIs remain `pcount`, `pcount_df`, and `build_pcount_matrices`.
 Stage 2 prepares the frame layer for later shared process formulas and
 prediction dispatch without adding a new fitting path.
 
+Stage 3 adds an experimental process-formula builder in `pyabundance.core`.
+It builds fixed-effect design matrices from `ProcessSpec` metadata and pandas
+data using the shared process vocabulary. This is foundation work for future
+shared prediction/newdata APIs, but Stage 3 does not implement prediction
+dispatch, pcount formula newdata prediction, occupancy, distance-sampling,
+dynamic models, or any new ecological model family.
+
 ## Core concepts
 
 ### `ProcessSpec`
@@ -49,6 +56,21 @@ site/observation data, site and visit labels, design column names, formula
 strings when provided, visit-label provenance, and small metadata. It validates
 only basic pcount frame consistency and is metadata/data-shape plumbing, not a
 model fitting path.
+
+### `ProcessDesign`
+
+`ProcessDesign` is an experimental fixed-effect design matrix for one process.
+It records the process name, process level, link, normalized RHS formula, a
+contiguous `float64` matrix, formulaic column names, and optional metadata.
+`build_process_design` builds one design from a `ProcessSpec` and a pandas
+`DataFrame`; `build_process_designs` builds a mapping of designs from process
+specs and data keyed by process level, such as `site` and `observation`.
+
+The Stage 3 builder intentionally supports only fixed-effect RHS formulas:
+examples include `~ x`, `~ visit - 1`, `~ x:visit`, and `~ x * visit`. It does
+not support response-side formulas, random effects, offsets, splines, dot
+expansion, prediction dispatch, or formula-less global processes such as
+negative-binomial `r` and ZIP `psi` when a design is explicitly requested.
 
 ### `FitResultProtocol`
 
@@ -101,8 +123,8 @@ This stage intentionally does not add or implement:
 
 Planned follow-up work can build on this metadata layer with:
 
-1. a process-formula builder that can be reused by multiple model families;
-2. generic `predict(type=...)` dispatch;
+1. generic `predict(type=...)` dispatch;
+2. shared pcount formula/newdata prediction built on process designs;
 3. a shared `FitList`/model comparison foundation;
 4. validation fixtures for cross-family parity checks;
 5. future model families such as `occu` once the shared foundation is proven.
