@@ -44,6 +44,18 @@ selected model, defaulting to the current lowest-AIC model, but it does not
 perform model averaging, ensemble prediction, stacking weights, refitting, or
 formula/newdata prediction.
 
+Stage 6 adds a test-only pcount validation fixture harness under
+`tests/fixtures/pcount_validation/` with helper loading code in `tests/helpers/`.
+The fixtures are deterministic synthetic Poisson, negative-binomial, and ZIP
+pcount cases with explicit metadata, parameter vectors, expected pyabundance
+log-likelihoods, tolerances, and clean-room provenance notes. They validate the
+existing public Python log-likelihood helpers and Rust-backed likelihood problem
+objects without changing Rust formulas, hot paths, fitting behavior, or stable
+pcount APIs. Default CI does not require R, `unmarked`, external datasets, or
+downloads; any R/`unmarked` comparison remains optional/manual and black-box
+only. Generated validation outputs, reports, benchmark files, coverage outputs,
+wheels, Mallard data, and Mallard results must not be committed.
+
 ## Core concepts
 
 ### `ProcessSpec`
@@ -188,5 +200,5 @@ This stage intentionally does not add or implement:
 Planned follow-up work can build on this metadata layer with:
 
 1. shared pcount formula/newdata prediction built on process designs;
-2. validation fixtures for cross-family parity checks;
+2. future validation fixtures for additional shared-core surfaces where needed;
 3. future model families such as `occu` once the shared foundation is proven.

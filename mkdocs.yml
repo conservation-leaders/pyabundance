@@ -13,6 +13,7 @@ nav:
   - Posterior Abundance: POSTERIOR_ABUNDANCE.md
   - Model Selection & Reporting: MODEL_SELECTION_REPORTING.md
   - Validation:
+      - pcount validation fixtures: validation/PCOUNT_VALIDATION_FIXTURES.md
       - Mallard unmarked comparison: validation/MALLARD_UNMARKED_COMPARISON.md
   - Benchmarks:
       - Running Benchmarks: benchmarks/BENCHMARKS.md
