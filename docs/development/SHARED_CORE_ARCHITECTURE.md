@@ -102,6 +102,7 @@ Supported pcount prediction types are:
 | `"lambda"` | `PCountResult.predict_lambda()` |
 | `"abundance"` | `PCountResult.predict_abundance()` |
 | `"p"` | `PCountResult.predict_detection()` |
+| `"det"` | `PCountResult.predict_detection()` |
 | `"detection"` | `PCountResult.predict_detection()` |
 | `"fitted"` | `PCountResult.fitted_counts()` |
 

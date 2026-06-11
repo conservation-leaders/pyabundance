@@ -32,6 +32,8 @@ def test_generic_predict_dispatches_pcount_matrix_fit_existing_data_types():
     np.testing.assert_allclose(predict(fit, type="lambda"), fit.predict_lambda())
     np.testing.assert_allclose(predict(fit, type="abundance"), fit.predict_abundance())
     np.testing.assert_allclose(predict(fit, type="p"), fit.predict_detection())
+    np.testing.assert_allclose(predict(fit, type="det"), predict(fit, type="p"))
+    np.testing.assert_allclose(predict(fit, type="det"), fit.predict_detection())
     np.testing.assert_allclose(predict(fit, type="detection"), fit.predict_detection())
     np.testing.assert_allclose(predict(fit, type="fitted"), fit.fitted_counts())
 
@@ -41,6 +43,7 @@ def test_pcount_result_predict_method_delegates_to_generic_dispatch():
 
     np.testing.assert_allclose(fit.predict(type="lambda"), predict(fit, type="lambda"))
     np.testing.assert_allclose(fit.predict(type="p"), predict(fit, type="p"))
+    np.testing.assert_allclose(fit.predict(type="det"), fit.predict_detection())
     np.testing.assert_allclose(fit.predict(type="fitted"), predict(fit, type="fitted"))
 
 
@@ -50,6 +53,7 @@ def test_pcount_dispatch_aliases_match_existing_methods():
     np.testing.assert_allclose(predict(fit, type="lambda"), fit.predict_lambda())
     np.testing.assert_allclose(predict(fit, type="abundance"), fit.predict_abundance())
     np.testing.assert_allclose(predict(fit, type="p"), fit.predict_detection())
+    np.testing.assert_allclose(predict(fit, type="det"), fit.predict_detection())
     np.testing.assert_allclose(predict(fit, type="detection"), fit.predict_detection())
 
 
@@ -68,8 +72,10 @@ def test_pcount_dispatch_can_forward_existing_method_options():
 def test_unsupported_prediction_type_has_clear_error():
     fit = _matrix_fit()
 
-    with pytest.raises(ValueError, match="unsupported prediction type 'psi'"):
+    with pytest.raises(ValueError, match="unsupported prediction type 'psi'") as exc_info:
         predict(fit, type="psi")
+
+    assert "det" in str(exc_info.value)
 
 
 def test_unsupported_result_object_has_clear_error():

@@ -19,6 +19,7 @@ _PCOUNT_TYPES = {
     "lambda": "lambda",
     "abundance": "abundance",
     "p": "p",
+    "det": "detection",
     "detection": "detection",
     "fitted": "fitted",
 }
