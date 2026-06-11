@@ -9,6 +9,7 @@ Predictor = Callable[[Any, str, dict[str, Any]], Any]
 
 _PREDICTORS: dict[str, Predictor] = {}
 _NEWDATA_KEYS = ("newdata", "new_site_data", "new_obs_data")
+_MATRIX_DESIGN_KEYS = ("X", "W")
 _PCOUNT_TYPES = {
     "lambda": "lambda",
     "abundance": "abundance",
@@ -105,6 +106,13 @@ def _predict_pcount(result: Any, prediction_type: str, kwargs: dict[str, Any]) -
     _require_pcount_methods(result)
     newdata_kwargs = {key: kwargs.pop(key) for key in _NEWDATA_KEYS if key in kwargs}
     if newdata_kwargs:
+        matrix_keys = [key for key in _MATRIX_DESIGN_KEYS if key in kwargs]
+        if matrix_keys:
+            names = ", ".join(matrix_keys)
+            raise ValueError(
+                "generic predict dispatch does not support combining formula newdata "
+                f"with matrix design kwargs: {names}"
+            )
         from pyabundance.prediction import predict_pcount_formula_newdata
 
         if canonical == "lambda":

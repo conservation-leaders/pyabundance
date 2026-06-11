@@ -116,6 +116,26 @@ def test_detection_newdata_matches_manual_w_prediction(
     assert actual.shape == (len(new_site_data), len(VISITS))
 
 
+def test_det_alias_newdata_matches_detection(
+    formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
+):
+    detection = formula_fit.predict(
+        type="detection",
+        new_site_data=new_site_data,
+        new_obs_data=new_obs_data,
+    )
+    det = formula_fit.predict(type="det", new_site_data=new_site_data, new_obs_data=new_obs_data)
+    core_det = predict(
+        formula_fit,
+        type="det",
+        new_site_data=new_site_data,
+        new_obs_data=new_obs_data,
+    )
+
+    np.testing.assert_allclose(det, detection)
+    np.testing.assert_allclose(core_det, detection)
+
+
 def test_fitted_newdata_matches_latent_mean_times_detection(
     formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
 ):
@@ -195,6 +215,72 @@ def test_core_predict_and_fit_predict_dispatch_newdata(
     np.testing.assert_allclose(via_core, via_method)
 
 
+def test_core_predict_rejects_formula_newdata_with_matrix_design_kwargs(
+    formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
+):
+    with pytest.raises(ValueError) as x_exc_info:
+        predict(
+            formula_fit,
+            type="lambda",
+            new_site_data=new_site_data,
+            X=np.ones((len(new_site_data), formula_fit.n_abundance_params), dtype=np.float64),
+        )
+
+    x_message = str(x_exc_info.value)
+    assert "combining formula newdata" in x_message
+    assert "matrix design kwargs" in x_message
+    assert "X" in x_message
+
+    with pytest.raises(ValueError) as w_exc_info:
+        predict(
+            formula_fit,
+            type="p",
+            new_site_data=new_site_data,
+            new_obs_data=new_obs_data,
+            W=np.ones(
+                (len(new_site_data), len(VISITS), formula_fit.n_detection_params),
+                dtype=np.float64,
+            ),
+        )
+
+    w_message = str(w_exc_info.value)
+    assert "combining formula newdata" in w_message
+    assert "matrix design kwargs" in w_message
+    assert "W" in w_message
+
+
+def test_fit_predict_rejects_formula_newdata_with_matrix_design_kwargs(
+    formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
+):
+    with pytest.raises(ValueError) as x_exc_info:
+        formula_fit.predict(
+            type="lambda",
+            new_site_data=new_site_data,
+            X=np.ones((len(new_site_data), formula_fit.n_abundance_params), dtype=np.float64),
+        )
+
+    x_message = str(x_exc_info.value)
+    assert "combining formula newdata" in x_message
+    assert "matrix design kwargs" in x_message
+    assert "X" in x_message
+
+    with pytest.raises(ValueError) as w_exc_info:
+        formula_fit.predict(
+            type="p",
+            new_site_data=new_site_data,
+            new_obs_data=new_obs_data,
+            W=np.ones(
+                (len(new_site_data), len(VISITS), formula_fit.n_detection_params),
+                dtype=np.float64,
+            ),
+        )
+
+    w_message = str(w_exc_info.value)
+    assert "combining formula newdata" in w_message
+    assert "matrix design kwargs" in w_message
+    assert "W" in w_message
+
+
 def test_matrix_fit_newdata_request_requires_formula_metadata(new_site_data: pd.DataFrame):
     y = np.ones((3, 2), dtype=np.float64)
     x = np.ones((3, 1), dtype=np.float64)
@@ -229,6 +315,47 @@ def test_missing_observation_rows_raise_clear_error(
     bad_obs = new_obs_data.iloc[:-1].copy()
 
     with pytest.raises(ValueError, match="missing required site×visit rows"):
+        formula_fit.predict(
+            type="detection",
+            new_site_data=new_site_data,
+            new_obs_data=bad_obs,
+        )
+
+
+def test_duplicate_observation_rows_raise_clear_error(
+    formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
+):
+    duplicate_obs = pd.concat([new_obs_data, new_obs_data.iloc[[0]]], ignore_index=True)
+
+    with pytest.raises(ValueError, match="one row per site × visit"):
+        formula_fit.predict(
+            type="p",
+            new_site_data=new_site_data,
+            new_obs_data=duplicate_obs,
+        )
+
+
+def test_unknown_observation_sites_raise_clear_error(
+    formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
+):
+    bad_obs = new_obs_data.copy()
+    bad_obs.loc[0, "site_id"] = "unknown-site"
+
+    with pytest.raises(ValueError, match="unknown sites"):
+        formula_fit.predict(
+            type="detection",
+            new_site_data=new_site_data,
+            new_obs_data=bad_obs,
+        )
+
+
+def test_unknown_observation_visits_raise_clear_error(
+    formula_fit, new_site_data: pd.DataFrame, new_obs_data: pd.DataFrame
+):
+    bad_obs = new_obs_data.copy()
+    bad_obs.loc[0, "visit"] = "unknown-visit"
+
+    with pytest.raises(ValueError, match="unknown visits"):
         formula_fit.predict(
             type="detection",
             new_site_data=new_site_data,

@@ -151,6 +151,8 @@ fit.predict_detection(W=new_W)
 
 Requests for formula newdata from matrix fits raise a formula-metadata-required
 error. Stage 7 does not include Stage 8 parity helpers or new model families.
+Formula newdata prediction cannot be combined with explicit matrix-design
+arguments (`X` or `W`) in the same generic `predict()` request.
 
 ## Current limitations
 
