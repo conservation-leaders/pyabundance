@@ -28,6 +28,21 @@ def test_process_spec_stores_metadata():
     assert spec.columns == ("Intercept", "forest")
 
 
+def test_process_spec_metadata_is_defensively_copied_and_frozen():
+    metadata = {"source": "initial"}
+    spec = ProcessSpec(
+        name="lambda",
+        formula=None,
+        link="log",
+        level="site",
+        metadata=metadata,
+    )
+    metadata["source"] = "changed"
+    assert spec.metadata["source"] == "initial"
+    with pytest.raises(TypeError):
+        spec.metadata["source"] = "mutated"
+
+
 def test_parameter_block_size_and_slice():
     block = ParameterBlock(
         name="lambda",
@@ -39,6 +54,15 @@ def test_parameter_block_size_and_slice():
     )
     assert block.size == 2
     assert block.slice == slice(0, 2)
+
+
+def test_parameter_block_metadata_is_defensively_copied_and_frozen():
+    metadata = {"kind": "initial"}
+    block = ParameterBlock(name="lambda", start=0, stop=1, link="log", metadata=metadata)
+    metadata["kind"] = "changed"
+    assert block.metadata["kind"] == "initial"
+    with pytest.raises(TypeError):
+        block.metadata["kind"] = "mutated"
 
 
 @pytest.mark.parametrize(
@@ -80,6 +104,42 @@ def test_model_spec_missing_block_raises_key_error():
         spec.block("missing")
 
 
+def test_model_spec_processes_are_defensively_copied_and_frozen():
+    lambda_process = ProcessSpec(name="lambda", formula=None, link="log", level="site")
+    p_process = ProcessSpec(name="p", formula=None, link="logit", level="observation")
+    processes = {"lambda": lambda_process}
+    spec = ModelSpec(model="pcount", processes=processes)
+    processes["p"] = p_process
+    assert spec.process_names == ("lambda",)
+    with pytest.raises(TypeError):
+        spec.processes["p"] = p_process
+
+
+def test_model_spec_metadata_is_defensively_copied_and_frozen():
+    metadata = {"mixture": "poisson"}
+    spec = ModelSpec(
+        model="pcount",
+        processes={"lambda": ProcessSpec(name="lambda", formula=None, link="log", level="site")},
+        metadata=metadata,
+    )
+    metadata["mixture"] = "changed"
+    assert spec.metadata["mixture"] == "poisson"
+    with pytest.raises(TypeError):
+        spec.metadata["mixture"] = "changed"
+
+
+def test_model_spec_rejects_duplicate_parameter_block_names():
+    lambda_process = ProcessSpec(name="lambda", formula=None, link="log", level="site")
+    block1 = ParameterBlock(name="lambda", start=0, stop=1, link="log", process="lambda")
+    block2 = ParameterBlock(name="lambda", start=1, stop=2, link="log", process="lambda")
+    with pytest.raises(ValueError, match="unique"):
+        ModelSpec(
+            model="pcount",
+            processes={"lambda": lambda_process},
+            parameter_blocks=(block1, block2),
+        )
+
+
 def test_model_frame_response_shape_and_n_sites():
     y = np.asarray([[1.0, 2.0], [0.0, 1.0]], dtype=np.float64)
     frame = ModelFrame(y=y, metadata={"model": "test"})
@@ -88,6 +148,18 @@ def test_model_frame_response_shape_and_n_sites():
     assert frame.site_data is None
     assert frame.obs_data is None
     assert frame.metadata["model"] == "test"
+
+
+def test_model_frame_normalizes_y_site_ids_and_metadata():
+    metadata = {"model": "test"}
+    frame = ModelFrame(y=[[1, 2], [3, 4]], site_ids=["s1", "s2"], metadata=metadata)
+    metadata["model"] = "changed"
+    assert frame.y.dtype == np.float64
+    assert frame.response_shape == (2, 2)
+    assert frame.site_ids == ("s1", "s2")
+    assert frame.metadata["model"] == "test"
+    with pytest.raises(TypeError):
+        frame.metadata["model"] = "changed"
 
 
 def test_model_frame_allows_optional_data_frames():

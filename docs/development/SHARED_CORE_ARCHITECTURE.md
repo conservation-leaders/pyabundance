@@ -41,6 +41,11 @@ The new subpackage is importable as `pyabundance.core`, but it is intentionally 
 
 `LikelihoodProblemProtocol` is the minimal likelihood-problem surface: an object with `loglik(theta) -> float`.
 
+Shared-core spec objects are intended to be stable metadata snapshots for fitted results.
+They defensively copy and freeze mapping metadata at construction time, including model
+process mappings. This is a shallow freeze only; nested objects inside metadata are not
+recursively frozen.
+
 ## pcount mapping
 
 The pcount adapter maps existing pcount metadata into shared-core concepts:

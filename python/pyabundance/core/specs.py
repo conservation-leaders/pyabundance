@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import Any, Literal, get_args
 
 LinkName = Literal["identity", "log", "logit", "cloglog"]
@@ -36,6 +37,7 @@ class ProcessSpec:
         if not isinstance(self.metadata, Mapping):
             raise TypeError("process metadata must be mapping-like")
         object.__setattr__(self, "columns", tuple(self.columns))
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
 
 
 @dataclass(frozen=True)
@@ -70,6 +72,7 @@ class ParameterBlock:
             raise ValueError("parameter block column count must match block size")
         if not isinstance(self.metadata, Mapping):
             raise TypeError("parameter block metadata must be mapping-like")
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
 
     @property
     def size(self) -> int:
@@ -97,17 +100,23 @@ class ModelSpec:
             raise TypeError("processes must be mapping-like")
         if not self.processes:
             raise ValueError("model spec must include at least one process")
-        for key, process in self.processes.items():
+        processes = dict(self.processes)
+        for key, process in processes.items():
             if not isinstance(key, str) or not key:
                 raise ValueError("process keys must be non-empty strings")
             if not isinstance(process, ProcessSpec):
                 raise TypeError("process values must be ProcessSpec instances")
             if key != process.name:
                 raise ValueError("process keys must match ProcessSpec.name")
+        object.__setattr__(self, "processes", MappingProxyType(processes))
         object.__setattr__(self, "parameter_blocks", tuple(self.parameter_blocks))
         for block in self.parameter_blocks:
             if not isinstance(block, ParameterBlock):
                 raise TypeError("parameter_blocks must contain ParameterBlock instances")
+        block_names = [block.name for block in self.parameter_blocks]
+        if len(set(block_names)) != len(block_names):
+            raise ValueError("parameter block names must be unique")
+        for block in self.parameter_blocks:
             if block.process is not None and block.process not in self.processes:
                 raise ValueError(f"parameter block process {block.process!r} is not in processes")
         sorted_blocks = sorted(self.parameter_blocks, key=lambda block: (block.start, block.stop))
@@ -120,6 +129,7 @@ class ModelSpec:
             raise TypeError("response must be a string or None")
         if not isinstance(self.metadata, Mapping):
             raise TypeError("model metadata must be mapping-like")
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))
 
     @property
     def process_names(self) -> tuple[str, ...]:
