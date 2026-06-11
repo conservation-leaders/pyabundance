@@ -90,9 +90,7 @@ class FramePCount:
         if y_arr.shape[1] != w_arr.shape[1]:
             raise ValueError("y and W must have the same number of visits")
 
-        site_ids = (
-            None if self.site_ids is None else _optional_tuple(self.site_ids, "site_ids")
-        )
+        site_ids = None if self.site_ids is None else _optional_tuple(self.site_ids, "site_ids")
         visit_labels = (
             None
             if self.visit_labels is None
