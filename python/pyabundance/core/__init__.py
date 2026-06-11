@@ -1,5 +1,6 @@
 """Experimental shared-core foundation for future pyabundance model families."""
 
+from pyabundance.core.fitlist import FitList
 from pyabundance.core.formulas import (
     ProcessDesign,
     build_process_design,
@@ -12,6 +13,7 @@ from pyabundance.core.results import FitResultProtocol, LikelihoodProblemProtoco
 from pyabundance.core.specs import ModelSpec, ParameterBlock, ProcessSpec
 
 __all__ = [
+    "FitList",
     "FitResultProtocol",
     "LikelihoodProblemProtocol",
     "FramePCount",
