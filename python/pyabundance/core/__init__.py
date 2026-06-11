@@ -7,6 +7,7 @@ from pyabundance.core.formulas import (
     validate_rhs_formula,
 )
 from pyabundance.core.frames import FramePCount, ModelFrame
+from pyabundance.core.predict import predict, register_predictor
 from pyabundance.core.results import FitResultProtocol, LikelihoodProblemProtocol
 from pyabundance.core.specs import ModelSpec, ParameterBlock, ProcessSpec
 
@@ -19,6 +20,8 @@ __all__ = [
     "ParameterBlock",
     "ProcessDesign",
     "ProcessSpec",
+    "predict",
+    "register_predictor",
     "build_process_design",
     "build_process_designs",
     "validate_rhs_formula",

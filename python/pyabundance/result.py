@@ -243,6 +243,33 @@ class PCountResult:
             },
         )
 
+    def predict(
+        self,
+        type: str = "lambda",
+        *,
+        newdata: Any = None,
+        new_site_data: Any = None,
+        new_obs_data: Any = None,
+        **kwargs: Any,
+    ) -> Any:
+        """Experimental generic prediction dispatch for this pcount fit.
+
+        Existing pcount prediction methods remain the stable API. This method
+        delegates to :func:`pyabundance.core.predict` and currently supports
+        existing-data pcount prediction types only.
+        """
+
+        from pyabundance.core.predict import predict
+
+        return predict(
+            self,
+            type=type,
+            newdata=newdata,
+            new_site_data=new_site_data,
+            new_obs_data=new_obs_data,
+            **kwargs,
+        )
+
     @property
     def has_covariance(self) -> bool:
         return self.covariance is not None and bool(
