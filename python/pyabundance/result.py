@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 import pandas as pd
@@ -11,6 +11,9 @@ from scipy.stats import norm
 from pyabundance import _core
 
 MixtureName = Literal["poisson", "negative_binomial", "zero_inflated_poisson"]
+
+if TYPE_CHECKING:
+    from pyabundance.core.specs import ModelSpec, ParameterBlock
 
 
 def _unique_preserving_order(values: list[Any]) -> list[str]:
@@ -126,6 +129,119 @@ class PCountResult:
     @property
     def aic(self) -> float:
         return 2.0 * self.params.size - 2.0 * self.loglik
+
+    def _resolved_param_names(self) -> list[str]:
+        if self.param_names is not None and len(self.param_names) == self.params.size:
+            return list(self.param_names)
+        return self._default_param_names()
+
+    @property
+    def parameter_blocks(self) -> tuple[ParameterBlock, ...]:
+        """Shared-core parameter blocks for the fitted pcount coefficient vector."""
+
+        from pyabundance.core.specs import ParameterBlock
+
+        names = self._resolved_param_names()
+        abundance_stop = self.n_abundance_params
+        detection_stop = abundance_stop + self.n_detection_params
+        blocks = [
+            ParameterBlock(
+                name="lambda",
+                start=0,
+                stop=abundance_stop,
+                link="log",
+                columns=tuple(names[:abundance_stop]),
+                process="lambda",
+            ),
+            ParameterBlock(
+                name="p",
+                start=abundance_stop,
+                stop=detection_stop,
+                link="logit",
+                columns=tuple(names[abundance_stop:detection_stop]),
+                process="p",
+            ),
+        ]
+        if self.mixture == "negative_binomial":
+            blocks.append(
+                ParameterBlock(
+                    name="r",
+                    start=detection_stop,
+                    stop=detection_stop + 1,
+                    link="log",
+                    columns=("log_r",),
+                    process="r",
+                )
+            )
+        elif self.mixture == "zero_inflated_poisson":
+            blocks.append(
+                ParameterBlock(
+                    name="psi",
+                    start=detection_stop,
+                    stop=detection_stop + 1,
+                    link="logit",
+                    columns=("logit_psi",),
+                    process="psi",
+                )
+            )
+        return tuple(blocks)
+
+    @property
+    def model_spec(self) -> ModelSpec:
+        """Experimental shared-core model metadata for this pcount fit."""
+
+        from pyabundance.core.specs import ModelSpec, ProcessSpec
+
+        names = self._resolved_param_names()
+        abundance_stop = self.n_abundance_params
+        detection_stop = abundance_stop + self.n_detection_params
+        processes = {
+            "lambda": ProcessSpec(
+                name="lambda",
+                formula=self.abundance_formula,
+                link="log",
+                level="site",
+                columns=tuple(names[:abundance_stop]),
+            ),
+            "p": ProcessSpec(
+                name="p",
+                formula=self.detection_formula,
+                link="logit",
+                level="observation",
+                columns=tuple(names[abundance_stop:detection_stop]),
+            ),
+        }
+        if self.mixture == "negative_binomial":
+            processes["r"] = ProcessSpec(
+                name="r",
+                formula=None,
+                link="log",
+                level="global",
+                columns=("log_r",),
+            )
+        elif self.mixture == "zero_inflated_poisson":
+            processes["psi"] = ProcessSpec(
+                name="psi",
+                formula=None,
+                link="logit",
+                level="global",
+                columns=("logit_psi",),
+            )
+        n_sites = int(self.y.shape[0]) if self.y.ndim > 0 else 0
+        n_visits = int(self.y.shape[1]) if self.y.ndim > 1 else 0
+        return ModelSpec(
+            model="pcount",
+            response="count",
+            processes=processes,
+            parameter_blocks=self.parameter_blocks,
+            metadata={
+                "mixture": self.mixture,
+                "K": int(self.K),
+                "from_dataframe": bool(self.from_dataframe),
+                "n_sites": n_sites,
+                "n_visits": n_visits,
+            },
+        )
 
     @property
     def has_covariance(self) -> bool:
