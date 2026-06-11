@@ -1,9 +1,4 @@
-"""Experimental shared prediction dispatch for fitted model results.
-
-This module intentionally provides only a small dispatch layer. It does not
-implement new prediction math or formula/newdata prediction; registered model
-handlers delegate to existing result methods.
-"""
+"""Experimental shared prediction dispatch for fitted model results."""
 
 from __future__ import annotations
 
@@ -14,7 +9,6 @@ Predictor = Callable[[Any, str, dict[str, Any]], Any]
 
 _PREDICTORS: dict[str, Predictor] = {}
 _NEWDATA_KEYS = ("newdata", "new_site_data", "new_obs_data")
-_MATRIX_NEWDATA_KEYS = ("X", "W")
 _PCOUNT_TYPES = {
     "lambda": "lambda",
     "abundance": "abundance",
@@ -59,20 +53,8 @@ def predict(
     new_obs_data: Any = None,
     **kwargs: Any,
 ) -> Any:
-    """Dispatch an experimental prediction request for a fitted result.
+    """Dispatch an experimental prediction request for a fitted result."""
 
-    Stage 4 supports only existing-data pcount predictions. Formula/newdata
-    prediction is intentionally rejected until a later shared-core stage.
-    """
-
-    _reject_newdata(
-        {
-            "newdata": newdata,
-            "new_site_data": new_site_data,
-            "new_obs_data": new_obs_data,
-            **kwargs,
-        }
-    )
     if not isinstance(type, str) or not type:
         raise ValueError("prediction type must be a non-empty string")
     model = _result_model(result)
@@ -84,18 +66,15 @@ def predict(
     handler = _PREDICTORS.get(model)
     if handler is None:
         raise TypeError(f"unsupported result object for generic predict dispatch: model {model!r}")
-    return handler(result, type, dict(kwargs))
-
-
-def _reject_newdata(values: dict[str, Any]) -> None:
-    requested = [key for key in _NEWDATA_KEYS if values.get(key) is not None]
-    requested += [key for key in _MATRIX_NEWDATA_KEYS if values.get(key) is not None]
-    if requested:
-        names = ", ".join(requested)
-        raise ValueError(
-            f"generic predict dispatch supports existing-data predictions only; "
-            f"{names} prediction is not implemented yet"
-        )
+    dispatch_kwargs = dict(kwargs)
+    for key, value in {
+        "newdata": newdata,
+        "new_site_data": new_site_data,
+        "new_obs_data": new_obs_data,
+    }.items():
+        if value is not None:
+            dispatch_kwargs[key] = value
+    return handler(result, type, dispatch_kwargs)
 
 
 def _result_model(result: Any) -> str | None:
@@ -124,6 +103,17 @@ def _predict_pcount(result: Any, prediction_type: str, kwargs: dict[str, Any]) -
             f"supported types are: {supported}"
         )
     _require_pcount_methods(result)
+    newdata_kwargs = {key: kwargs.pop(key) for key in _NEWDATA_KEYS if key in kwargs}
+    if newdata_kwargs:
+        from pyabundance.prediction import predict_pcount_formula_newdata
+
+        if canonical == "lambda":
+            return predict_pcount_formula_newdata(result, "lambda", **newdata_kwargs, **kwargs)
+        if canonical == "abundance":
+            return predict_pcount_formula_newdata(result, "abundance", **newdata_kwargs, **kwargs)
+        if canonical in {"p", "detection"}:
+            return predict_pcount_formula_newdata(result, "detection", **newdata_kwargs, **kwargs)
+        return predict_pcount_formula_newdata(result, "fitted", **newdata_kwargs, **kwargs)
     if canonical == "lambda":
         return result.predict_lambda(**kwargs)
     if canonical == "abundance":
