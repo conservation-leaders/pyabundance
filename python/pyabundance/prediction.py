@@ -158,9 +158,7 @@ def _resolve_new_site_data(*, newdata: Any, new_site_data: Any) -> pd.DataFrame:
         raise ValueError("pass only one of newdata or new_site_data")
     value = new_site_data if new_site_data is not None else newdata
     if not isinstance(value, pd.DataFrame):
-        raise ValueError(
-            "new_site_data must be a pandas DataFrame for formula newdata prediction"
-        )
+        raise ValueError("new_site_data must be a pandas DataFrame for formula newdata prediction")
     return value.reset_index(drop=True).copy()
 
 
@@ -401,8 +399,4 @@ def _fitted_dataframe(
 
 
 def _site_visit_rows(site_ids: list[Any], visit_labels: list[Any]) -> list[dict[str, Any]]:
-    return [
-        {"site_id": site_id, "visit": visit}
-        for site_id in site_ids
-        for visit in visit_labels
-    ]
+    return [{"site_id": site_id, "visit": visit} for site_id in site_ids for visit in visit_labels]
