@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import pandas as pd
@@ -10,6 +10,9 @@ from numpy.typing import NDArray
 
 from pyabundance.k_selection import KSuggestion, suggest_K
 from pyabundance.pcount import pcount
+
+if TYPE_CHECKING:
+    from pyabundance.core import FramePCount
 
 _INTERNAL_SITE_INDEX = "__pyabundance_site_index__"
 
@@ -39,6 +42,13 @@ class PCountMatrices:
             "n_abundance_params": int(self.X.shape[1]),
             "n_detection_params": int(self.W.shape[2]),
         }
+
+    def to_frame(self) -> FramePCount:
+        """Return an experimental shared-core ``FramePCount`` adapter."""
+
+        from pyabundance.core import FramePCount
+
+        return FramePCount.from_pcount_matrices(self)
 
 
 def _validate_formula(formula: str, name: str) -> str:
@@ -336,7 +346,7 @@ def build_pcount_matrices(
     if W_flat.shape[0] != n_sites * n_visits:
         raise ValueError("detection design does not have one row per site × visit")
     W = np.ascontiguousarray(W_flat.reshape(n_sites, n_visits, W_flat.shape[1]), dtype=np.float64)
-    return PCountMatrices(
+    matrices = PCountMatrices(
         y=y,
         X=X,
         W=W,
@@ -350,6 +360,9 @@ def build_pcount_matrices(
         site_data_used=site_df.reset_index(drop=True),
         obs_data_used=obs_df.reset_index(drop=True),
     )
+    object.__setattr__(matrices, "abundance_formula", abundance_formula)
+    object.__setattr__(matrices, "detection_formula", detection_formula)
+    return matrices
 
 
 def pcount_df(
