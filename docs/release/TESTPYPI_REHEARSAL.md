@@ -33,20 +33,20 @@ Use PyPI as the dependency fallback because TestPyPI usually does not mirror dep
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  pyabundance==1.0.0rc1
+  pyabundance==1.0.0rc2
 ```
 
 ## 5. Run smoke tests
 
 ```bash
-python scripts/smoke_test_installed.py --expected-version 1.0.0rc1
+python scripts/smoke_test_installed.py --expected-version 1.0.0rc2
 ```
 
 The smoke test imports pyabundance, loads a bundled example dataset, fits a tiny Poisson `pcount_df` model, computes posterior abundance, and runs a small model comparison.
 
 ## 6. If project name/version already exists
 
-Package versions cannot be overwritten on TestPyPI. If `1.0.0rc1` already exists, bump to a development or post release such as `1.0.0rc1.post1` or `1.0.0rc2`, rebuild, and rerun the workflow.
+Package versions cannot be overwritten on TestPyPI. If `1.0.0rc2` already exists, bump to a development or post release such as `1.0.0rc2.post1` or `1.0.0rc2`, rebuild, and rerun the workflow.
 
 ## 7. Clean up or bump dev versions
 

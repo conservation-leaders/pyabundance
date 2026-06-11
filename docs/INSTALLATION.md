@@ -20,11 +20,11 @@ After maintainers run the TestPyPI workflow:
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  pyabundance==1.0.0rc1
+  pyabundance==1.0.0rc2
 ```
 
 ## Smoke test
 
 ```bash
-python scripts/smoke_test_installed.py --expected-version 1.0.0rc1
+python scripts/smoke_test_installed.py --expected-version 1.0.0rc2
 ```

@@ -8,6 +8,7 @@ import pandas as pd
 from formulaic import Formula, model_matrix
 from numpy.typing import NDArray
 
+from pyabundance.k_selection import KSuggestion, suggest_K
 from pyabundance.pcount import pcount
 
 _INTERNAL_SITE_INDEX = "__pyabundance_site_index__"
@@ -24,6 +25,9 @@ class PCountMatrices:
     detection_column_names: list[str]
     site_ids: list[Any]
     visit_labels: list[Any]
+    count_cols: list[Any]
+    visit_label_source: str
+    visit_label_message: str | None
     site_data_used: pd.DataFrame
     obs_data_used: pd.DataFrame
 
@@ -161,8 +165,11 @@ def _provided_obs_data(
     if unknown_sites:
         raise ValueError(f"obs_data contains site IDs not present in site_data: {unknown_sites}")
     if unknown_visits:
+        unique_visits = _ordered_unique_visits(obs, visit_col)
         raise ValueError(
-            f"obs_data contains visits not present in visit_labels/count_cols: {unknown_visits}"
+            f"obs_data visit values are {unique_visits}, but count_cols are {count_cols}. "
+            f"If these represent the same visits, pass visit_labels={unique_visits!r} "
+            "or use visit_labels='auto'."
         )
 
     expected = pd.MultiIndex.from_product([site_ids, visit_labels], names=[site_id_col, visit_col])
@@ -186,6 +193,65 @@ def _provided_obs_data(
     return merged.reset_index(drop=True)
 
 
+def _ordered_unique_visits(obs_data: pd.DataFrame, visit_col: str) -> list[Any]:
+    series = obs_data[visit_col]
+    dtype = getattr(series, "dtype", None)
+    if isinstance(dtype, pd.CategoricalDtype) and dtype.ordered:
+        present = set(series.dropna())
+        return [category for category in dtype.categories.tolist() if category in present]
+    return series.dropna().drop_duplicates().tolist()
+
+
+def _is_ordered_categorical(series: pd.Series) -> bool:
+    dtype = getattr(series, "dtype", None)
+    return isinstance(dtype, pd.CategoricalDtype) and dtype.ordered
+
+
+def _resolve_visit_labels(
+    *,
+    count_cols: list[Any],
+    obs_data: pd.DataFrame | None,
+    visit_col: str,
+    visit_labels: list[Any] | str | None,
+) -> tuple[list[Any], str, str | None]:
+    if obs_data is None:
+        if visit_labels in (None, "auto"):
+            return list(count_cols), "count_cols", None
+        explicit = _as_list(visit_labels, "visit_labels")
+        if len(explicit) != len(count_cols):
+            raise ValueError("visit_labels must have the same length as count_cols")
+        return explicit, "explicit", None
+
+    if visit_labels not in (None, "auto"):
+        explicit = _as_list(visit_labels, "visit_labels")
+        if len(explicit) != len(count_cols):
+            raise ValueError("visit_labels must have the same length as count_cols")
+        return explicit, "explicit", None
+
+    if visit_col not in obs_data.columns:
+        raise ValueError(f"obs_data must contain visit_col {visit_col!r}")
+    visit_series = obs_data[visit_col]
+    unique_visits = _ordered_unique_visits(obs_data, visit_col)
+    if len(set(unique_visits)) != len(unique_visits):
+        raise ValueError("obs_data visit values must be unique after dropping missing labels")
+    if set(unique_visits) == set(count_cols) and len(unique_visits) == len(count_cols):
+        return list(count_cols), "count_cols", None
+    if _is_ordered_categorical(visit_series) and len(unique_visits) == len(count_cols):
+        message = f"Inferred visit_labels from obs_data[{visit_col!r}]: {unique_visits!r}."
+        return unique_visits, "auto_obs_data", message
+    if _is_ordered_categorical(visit_series):
+        raise ValueError(
+            f"obs_data visit values are {unique_visits}, but count_cols are {count_cols}. "
+            "Pass explicit visit_labels in the order matching count_cols."
+        )
+    raise ValueError(
+        "obs_data visit values differ from count_cols and cannot be safely auto-inferred "
+        f"unless obs_data[{visit_col!r}] is an ordered pandas Categorical. Pass explicit "
+        "visit_labels=[...] in the order matching count_cols, or convert "
+        f"obs_data[{visit_col!r}] to an ordered categorical."
+    )
+
+
 def build_pcount_matrices(
     *,
     site_data: pd.DataFrame,
@@ -195,7 +261,7 @@ def build_pcount_matrices(
     obs_data: pd.DataFrame | None = None,
     site_id_col: str | None = None,
     visit_col: str = "visit",
-    visit_labels: list[Any] | None = None,
+    visit_labels: list[Any] | str | None = "auto",
     drop_missing_sites: bool = False,
 ) -> PCountMatrices:
     """Build matrix/tensor inputs for ``pcount`` from pandas data and formulas."""
@@ -204,12 +270,18 @@ def build_pcount_matrices(
     count_cols_list = _as_list(count_cols, "count_cols")
     abundance_formula = _validate_formula(abundance_formula, "abundance_formula")
     detection_formula = _validate_formula(detection_formula, "detection_formula")
-    if visit_labels is None:
-        visit_labels_list = list(count_cols_list)
-    else:
-        visit_labels_list = _as_list(visit_labels, "visit_labels")
-        if len(visit_labels_list) != len(count_cols_list):
-            raise ValueError("visit_labels must have the same length as count_cols")
+    if obs_data is not None:
+        if site_id_col is None:
+            raise ValueError("site_id_col is required when obs_data is provided")
+        if site_id_col not in obs_data.columns:
+            raise ValueError(f"obs_data must contain site_id_col {site_id_col!r}")
+    obs_for_labels = _require_dataframe(obs_data, "obs_data") if obs_data is not None else None
+    visit_labels_list, visit_label_source, visit_label_message = _resolve_visit_labels(
+        count_cols=count_cols_list,
+        obs_data=obs_for_labels,
+        visit_col=visit_col,
+        visit_labels=visit_labels,
+    )
     if site_id_col is not None and site_id_col not in site_df.columns:
         raise ValueError(f"site_data must contain site_id_col {site_id_col!r}")
 
@@ -242,9 +314,13 @@ def build_pcount_matrices(
             visit_labels=visit_labels_list,
         )
     else:
+        if obs_for_labels is not None:
+            provided_obs = obs_for_labels
+        else:
+            provided_obs = _require_dataframe(obs_data, "obs_data")
         obs_df = _provided_obs_data(
             site_df,
-            _require_dataframe(obs_data, "obs_data"),
+            provided_obs,
             count_cols=count_cols_list,
             site_id_col=site_id_col,
             visit_col=visit_col,
@@ -268,6 +344,9 @@ def build_pcount_matrices(
         detection_column_names=detection_names,
         site_ids=site_ids,
         visit_labels=visit_labels_list,
+        count_cols=count_cols_list,
+        visit_label_source=visit_label_source,
+        visit_label_message=visit_label_message,
         site_data_used=site_df.reset_index(drop=True),
         obs_data_used=obs_df.reset_index(drop=True),
     )
@@ -282,9 +361,9 @@ def pcount_df(
     obs_data: pd.DataFrame | None = None,
     site_id_col: str | None = None,
     visit_col: str = "visit",
-    visit_labels: list[Any] | None = None,
+    visit_labels: list[Any] | str | None = "auto",
     mixture: str = "poisson",
-    K: int | None = None,
+    K: int | str | None = None,
     start: Any = None,
     method: str = "BFGS",
     se: bool = False,
@@ -304,10 +383,16 @@ def pcount_df(
         visit_labels=visit_labels,
         drop_missing_sites=drop_missing_sites,
     )
+    K_info: KSuggestion | None = None
     if K is None:
         observed = matrices.y[~np.isnan(matrices.y)]
         max_count = int(np.max(observed)) if observed.size else 0
         K = max(60, max_count + 20)
+    elif K == "auto":
+        K_suggestion = suggest_K(matrices.y, return_info=True)
+        assert isinstance(K_suggestion, KSuggestion)
+        K_info = K_suggestion
+        K = K_suggestion.K
     fit = pcount(
         matrices.y,
         matrices.X,
@@ -326,5 +411,8 @@ def pcount_df(
         detection_formula=detection_formula,
         from_dataframe=True,
         data_info=matrices.data_info,
+        K_info=K_info,
+        visit_label_source=matrices.visit_label_source,
+        visit_label_message=matrices.visit_label_message,
     )
     return fit

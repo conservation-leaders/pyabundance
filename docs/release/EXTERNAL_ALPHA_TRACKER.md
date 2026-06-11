@@ -2,7 +2,7 @@
 
 Status: NOT STARTED
 
-Version: 1.0.0rc1
+Version: 1.0.0rc2
 
 | Reviewer role | Invited | Accepted | Completed | Blockers found | Notes |
 |---|---:|---:|---:|---:|---|

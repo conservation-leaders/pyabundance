@@ -107,7 +107,7 @@ jobs:
         shell: bash
         run: |
           python -m pip install --upgrade pip
-          python scripts/smoke_test_wheel.py dist --expected-version 1.0.0rc1
+          python scripts/smoke_test_wheel.py dist --expected-version 1.0.0rc2
       - name: Upload wheel matrix status
         uses: actions/upload-artifact@v4
         if: always()

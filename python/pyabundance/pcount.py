@@ -7,6 +7,7 @@ from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import minimize
 
 from pyabundance import _core
+from pyabundance.k_selection import KSuggestion, suggest_K
 from pyabundance.result import MixtureName, PCountResult
 from pyabundance.uncertainty import (
     covariance_diagnostics,
@@ -127,7 +128,7 @@ def pcount(
     y: ArrayLike,
     X: ArrayLike,
     W: ArrayLike,
-    K: int = 60,
+    K: int | str = 60,
     mixture: str = "poisson",
     start: ArrayLike | None = None,
     method: str = "BFGS",
@@ -142,23 +143,54 @@ def pcount(
     detection_formula: str | None = None,
     from_dataframe: bool = False,
     data_info: dict[str, int] | None = None,
+    K_info: KSuggestion | dict[str, Any] | None = None,
+    visit_label_source: str | None = None,
+    visit_label_message: str | None = None,
 ) -> PCountResult:
     """Fit a single-season N-mixture model using matrix/tensor inputs."""
     canonical = canonical_mixture(mixture)
+    model_warnings: list[str] = []
+    covariance_warnings: list[str] = []
+    if isinstance(K, str):
+        if K != "auto":
+            raise ValueError("K must be an integer or 'auto'")
+        K_suggestion = suggest_K(y, return_info=True)
+        assert isinstance(K_suggestion, KSuggestion)
+        K = K_suggestion.K
+        K_info = K_suggestion
+        model_warnings.append(K_suggestion.message)
+    elif K_info is not None and hasattr(K_info, "message"):
+        model_warnings.append(str(K_info.message))
+    K_int = int(K)
     if cov_method is None:
         cov_method = "bfgs" if se else "none"
     if cov_method not in {"bfgs", "finite_difference", "none"}:
         raise ValueError("cov_method must be 'bfgs', 'finite_difference', or 'none'")
     if not se:
         cov_method = "none"
-    y_arr, x_arr, w_arr, start_arr = validate_pcount_inputs(y, X, W, K, start, mixture=canonical)
+    y_arr, x_arr, w_arr, start_arr = validate_pcount_inputs(
+        y, X, W, K_int, start, mixture=canonical
+    )
+    observed = y_arr[~np.isnan(y_arr)]
+    if observed.size:
+        max_observed = int(np.max(observed))
+        if K_int - max_observed < 5:
+            model_warnings.append(
+                f"K={K_int} is close to the max observed count {max_observed}; "
+                "consider a larger K and check sensitivity."
+            )
+    if canonical == "zero_inflated_poisson":
+        model_warnings.append(
+            "ZIP identifiability caution: many zeros can sometimes be explained by low "
+            "abundance or low detection rather than structural zero inflation."
+        )
     problem: Any
     if canonical == "poisson":
-        problem = _core.PCountPoissonProblem(y_arr, x_arr, w_arr, int(K))
+        problem = _core.PCountPoissonProblem(y_arr, x_arr, w_arr, K_int)
     elif canonical == "negative_binomial":
-        problem = _core.PCountNegBinProblem(y_arr, x_arr, w_arr, int(K))
+        problem = _core.PCountNegBinProblem(y_arr, x_arr, w_arr, K_int)
     else:
-        problem = _core.PCountZIPProblem(y_arr, x_arr, w_arr, int(K))
+        problem = _core.PCountZIPProblem(y_arr, x_arr, w_arr, K_int)
 
     def objective(theta: NDArray[np.float64]) -> float:
         theta_arr = np.ascontiguousarray(theta, dtype=np.float64)
@@ -174,28 +206,29 @@ def pcount(
     params = np.asarray(opt.x, dtype=np.float64)
     loglik = -float(opt.fun) if np.isfinite(opt.fun) else float("nan")
 
-    warnings: list[str] = []
+    if not bool(opt.success):
+        model_warnings.append(f"convergence warning: optimizer reported {opt.message}")
     covariance = None
     hessian = None
     pseudo_inverse_used = False
     if se and cov_method == "bfgs":
         covariance = extract_bfgs_covariance(opt, params.size)
         if covariance is None:
-            warnings.append("BFGS inverse-Hessian covariance was unavailable")
+            covariance_warnings.append("BFGS inverse-Hessian covariance was unavailable")
     elif se and cov_method == "finite_difference":
         try:
             hessian = finite_difference_hessian(objective, params)
             covariance, pseudo_inverse_used, inversion_warnings = safe_invert_hessian(hessian)
-            warnings.extend(inversion_warnings)
+            covariance_warnings.extend(inversion_warnings)
         except Exception as exc:
-            warnings.append(f"finite-difference covariance failed: {exc}")
+            covariance_warnings.append(f"finite-difference covariance failed: {exc}")
             covariance = None
     cov_diag = covariance_diagnostics(
         covariance,
         hessian,
         method=str(cov_method),
         pseudo_inverse_used=pseudo_inverse_used,
-        warnings=warnings,
+        warnings=covariance_warnings,
     )
     standard_errors = standard_errors_from_covariance(covariance, params.size)
     abundance_names = (
@@ -221,7 +254,7 @@ def pcount(
         loglik=loglik,
         success=bool(opt.success),
         message=str(opt.message),
-        K=int(K),
+        K=K_int,
         mixture=canonical,
         X=x_arr,
         W=w_arr,
@@ -237,12 +270,15 @@ def pcount(
         detection_formula=detection_formula,
         from_dataframe=from_dataframe,
         data_info=data_info,
+        K_info=K_info,
+        visit_label_source=visit_label_source,
+        visit_label_message=visit_label_message,
         covariance=covariance,
         standard_errors=standard_errors,
         cov_method=str(cov_method),
         covariance_diagnostics=cov_diag,
         param_names=param_names,
-        warnings=warnings,
+        warnings=model_warnings,
         objective_value=float(opt.fun) if np.isfinite(opt.fun) else None,
         _problem=problem,
     )

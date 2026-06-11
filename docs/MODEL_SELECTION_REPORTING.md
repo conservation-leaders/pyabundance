@@ -86,3 +86,7 @@ Available synthetic examples are `"poisson"`, `"negative_binomial"`, and `"zip"`
 ## Posterior abundance note
 
 See `docs/POSTERIOR_ABUNDANCE.md` for ranef-like latent abundance summaries and posterior predictive checks. These condition on fitted parameters and should be interpreted separately from uncertainty intervals over fitted coefficients.
+
+## Guided workflow
+
+For the beginner-friendly guided workflow, see [Guided analysis](GUIDED_ANALYSIS.md).

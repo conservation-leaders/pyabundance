@@ -7,10 +7,13 @@ nav:
   - Home: index.md
   - Installation: INSTALLATION.md
   - Quickstart: QUICKSTART.md
+  - Guided analysis: GUIDED_ANALYSIS.md
   - Formula API: FORMULA_API.md
   - Uncertainty: UNCERTAINTY.md
   - Posterior Abundance: POSTERIOR_ABUNDANCE.md
   - Model Selection & Reporting: MODEL_SELECTION_REPORTING.md
+  - Validation:
+      - Mallard unmarked comparison: validation/MALLARD_UNMARKED_COMPARISON.md
   - Benchmarks:
       - Running Benchmarks: benchmarks/BENCHMARKS.md
       - Local Benchmark Caveat: benchmarks/LOCAL_BENCHMARK_CAVEAT.md
@@ -27,6 +30,7 @@ nav:
       - Contributing: development/CONTRIBUTING.md
       - Clean-room Policy: development/CLEAN_ROOM_POLICY.md
       - Repository Hygiene: development/REPOSITORY_HYGIENE.md
+      - Performance Architecture: development/PERFORMANCE_ARCHITECTURE.md
       - GitHub Actions: development/GITHUB_ACTIONS.md
       - GitHub Actions Stabilization: development/GITHUB_ACTIONS_STABILIZATION.md
       - Cleanup Inventory: development/CLEANUP_INVENTORY.md
@@ -44,7 +48,9 @@ nav:
       - Docs Deployment: release/DOCS_DEPLOYMENT.md
       - API Freeze: release/API_FREEZE.md
       - v1.0.0rc1 Release Notes: release/RELEASE_NOTES_1.0.0rc1.md
+      - v1.0.0rc2 Release Notes: release/RELEASE_NOTES_1.0.0rc2.md
       - GitHub Release Draft rc1: release/GITHUB_RELEASE_DRAFT_1.0.0rc1.md
+      - GitHub Release Draft rc2: release/GITHUB_RELEASE_DRAFT_1.0.0rc2.md
   - Roadmap: ROADMAP.md
 plugins:
   - search

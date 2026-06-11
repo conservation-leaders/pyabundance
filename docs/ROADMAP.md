@@ -118,3 +118,7 @@
 - R parity fixture suite
 - wheels for Linux/macOS/Windows
 - contribution governance
+
+## Guided workflow
+
+For the beginner-friendly guided workflow, see [Guided analysis](GUIDED_ANALYSIS.md).

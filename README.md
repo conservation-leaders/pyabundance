@@ -12,7 +12,7 @@ pyabundance is a clean-room Python library for ecological abundance modelling wi
 
 ## Current status
 
-pyabundance is at external-alpha / release-candidate stage (`1.0.0rc1`). It is ready for reviewer installation and workflow feedback, but it is not yet a final stable v1.0 release.
+pyabundance is at external-alpha / release-candidate stage (`1.0.0rc2`). It is ready for reviewer installation and workflow feedback, but it is not yet a final stable v1.0 release.
 
 Not yet implemented:
 
@@ -41,8 +41,33 @@ TestPyPI rehearsal install, after maintainers publish the release candidate:
 python -m pip install \
   --index-url https://test.pypi.org/simple/ \
   --extra-index-url https://pypi.org/simple/ \
-  pyabundance==1.0.0rc1
+  pyabundance==1.0.0rc2
 ```
+
+## Guided pcount analysis
+
+```python
+from pyabundance import analyze_pcount, load_example_pcount
+
+data = load_example_pcount("poisson")
+
+analysis = analyze_pcount(
+    site_data=data.site_data,
+    obs_data=data.obs_data,
+    site_id_col="site_id",
+    count_cols=data.count_cols,
+    abundance_formula=data.abundance_formula,
+    detection_formula=data.detection_formula,
+    K="auto",
+)
+
+print(analysis.summary())
+print(analysis.explain())
+analysis.export_report("abundance_report.md")
+```
+
+Use `analyze_pcount()` for the easiest workflow, `pcount_df()` for explicit single-model
+formula fits, and `pcount()` for matrix-level power-user control.
 
 ## Quick start
 

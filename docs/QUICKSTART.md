@@ -32,3 +32,7 @@ print(compare_models({"covariate": fit, "intercept": intercept}).summary())
 ```
 
 Use `pcount(...)` directly when you already have a count matrix, abundance design matrix, and detection design tensor.
+
+## Guided workflow
+
+For the beginner-friendly guided workflow, see [Guided analysis](GUIDED_ANALYSIS.md).

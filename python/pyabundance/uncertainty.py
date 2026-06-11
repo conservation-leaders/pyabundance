@@ -117,7 +117,8 @@ def covariance_diagnostics(
         "warnings": warn,
     }
     if covariance is None:
-        warn.append("covariance is unavailable")
+        if method != "none":
+            warn.append("covariance is unavailable")
         return diag
     cov = np.asarray(covariance, dtype=np.float64)
     diag["finite"] = bool(np.all(np.isfinite(cov)))

@@ -57,3 +57,5 @@ htmlcov/
 # Misc generated inventories
 reports_tracked_files_before_cleanup.txt
 reports_all_files_before_cleanup.txt
+/data/mallard/
+/results/mallard/

@@ -11,6 +11,7 @@ def main() -> None:
     args = parser.parse_args()
     from pyabundance import (
         __version__,
+        analyze_pcount,
         compare_models,
         load_example_pcount,
         model_report,
@@ -40,7 +41,23 @@ def main() -> None:
     report = model_report(fit_a)
     assert report["mixture"] == "poisson"
     assert "# pyabundance model report" in report_markdown(fit_a)
+    assert fit_a.coef_table(as_dataframe=True).shape[0] == fit_a.params.size
     assert compare_models({"x": fit_a, "intercept": fit_b}).table.shape[0] == 2
+    assert compare_models([fit_a, fit_b], names=["x", "intercept"]).table.shape[0] == 2
+    analysis = analyze_pcount(
+        site_data=data.site_data,
+        obs_data=data.obs_data,
+        site_id_col="site_id",
+        count_cols=data.count_cols,
+        abundance_formula=data.abundance_formula,
+        detection_formula=data.detection_formula,
+        K="auto",
+        se=False,
+    )
+    assert analysis.best_model is not None
+    assert analysis.best_model_name in analysis.fits
+    assert "PCountAnalysis" in analysis.summary()
+    assert analysis.explain()
     print(f"pyabundance {__version__} installed-package smoke test passed")
 
 

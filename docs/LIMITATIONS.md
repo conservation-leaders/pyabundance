@@ -17,3 +17,7 @@ Current limitations:
 - R/unmarked comparisons are black-box validation targets only.
 
 Users should inspect convergence, diagnostics, uncertainty warnings, and sensitivity to `K` before relying on a model for applied decisions.
+
+## Guided workflow
+
+For the beginner-friendly guided workflow, see [Guided analysis](GUIDED_ANALYSIS.md).
