@@ -25,6 +25,7 @@ nav:
       - pcount: api/pcount.md
       - Results: api/result.md
       - Formula/Data: api/formula.md
+      - Simulation: api/simulation.md
       - Model Selection: api/model_selection.md
       - Datasets: api/datasets.md
   - Development:

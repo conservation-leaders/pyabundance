@@ -64,5 +64,5 @@ refits where available.
 This is a pcount-specific diagnostic helper. It does not change likelihood math,
 Rust likelihood formulas, or Rust likelihood hot paths. It does not add a new
 ecological model family, `occu`, distance-sampling models, dynamic/open models,
-Stage 8B parameter mapping helpers, Stage 8C generic simulation facades, or
-Stage 8D generic parametric-bootstrap facades.
+parameter mapping helpers, generic simulation facades, or generic
+parametric-bootstrap facades.

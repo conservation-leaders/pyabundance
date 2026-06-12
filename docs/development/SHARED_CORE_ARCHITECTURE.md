@@ -77,9 +77,20 @@ parameter delta versus the reference fit. It preserves formula/DataFrame
 metadata where available and does not mutate the original fit. Stage 8A changes
 Python diagnostic plumbing only: no Rust likelihood formulas, Rust likelihood
 hot paths, new ecological model families, `occu`, distance-sampling models,
-dynamic/open models, Stage 8B parameter mapping helpers, Stage 8C generic
-simulation facades, or Stage 8D generic parametric-bootstrap facades are
-included.
+dynamic/open models, parameter mapping helpers, generic simulation facades, or
+generic parametric-bootstrap facades are included.
+
+Stage 8B adds an experimental generic simulation facade in `pyabundance.core`.
+`pyabundance.core.simulate(model, ...)` dispatches by model-family name and
+currently supports only `model="pcount"`. The pcount handler delegates directly
+to the existing stable simulation helpers: `simulate_pcount`,
+`simulate_pcount_negbin`, and `simulate_pcount_zip`. It accepts the existing
+pcount mixture names and aliases, uses `detection` as the preferred detection
+coefficient keyword, accepts `alpha` as a compatibility alias, and passes
+`seed` through unchanged. Existing pcount simulation functions remain the source
+of truth for simulation math and stable user-facing APIs. Stage 8B does not add
+new ecological model families, `occu`, distance-sampling models, dynamic/open
+models, parameter mapping helpers, or a generic parametric-bootstrap facade.
 
 ## Core concepts
 
@@ -244,9 +255,9 @@ This stage intentionally does not add or implement:
 - a new ecological model family;
 - occupancy (`occu`);
 - formula/newdata prediction beyond pcount fits created with `pcount_df`;
-- Stage 8B parameter mapping, Stage 8C generic simulate, or Stage 8D generic parboot helpers;
+- parameter mapping helpers;
 - generic K sensitivity helpers beyond the pcount-specific Stage 8A helper;
-- generic simulate or parboot facades;
+- generic parboot facades;
 - model averaging, refitting, stacking, or ensemble prediction;
 - new likelihoods;
 - changes to Rust likelihood formulas or hot paths;
@@ -257,5 +268,6 @@ This stage intentionally does not add or implement:
 Planned follow-up work can build on this metadata layer with:
 
 1. Stage 8 pcount parity helpers where separately approved;
-2. future validation fixtures for additional shared-core surfaces where needed;
-3. future model families such as `occu` once the shared foundation is proven.
+2. future parameter mapping or parametric-bootstrap facades where separately approved;
+3. future validation fixtures for additional shared-core surfaces where needed;
+4. future model families such as `occu` once the shared foundation is proven.
