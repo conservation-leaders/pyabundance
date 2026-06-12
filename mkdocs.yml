@@ -13,6 +13,7 @@ nav:
   - Posterior Abundance: POSTERIOR_ABUNDANCE.md
   - Model Selection & Reporting: MODEL_SELECTION_REPORTING.md
   - K Selection: K_SELECTION.md
+  - pcount Parameter Mapping: PCOUNT_PARAMETER_MAPPING.md
   - Validation:
       - pcount validation fixtures: validation/PCOUNT_VALIDATION_FIXTURES.md
       - Mallard unmarked comparison: validation/MALLARD_UNMARKED_COMPARISON.md
