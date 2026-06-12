@@ -68,6 +68,19 @@ no Rust likelihood formulas, Rust likelihood hot paths, new ecological model
 families, `occu`, dynamic/open models, K sensitivity helpers, generic simulate
 facades, generic parboot facades, or Stage 8 parity helpers are included.
 
+Stage 8A adds a small pcount-specific K sensitivity helper in
+`pyabundance.k_selection`. `pcount_k_sensitivity()` accepts an existing
+`PCountResult`, refits the same pcount specification across candidate K values
+using the existing `pcount()` path, and summarizes log-likelihood, AIC,
+delta-AIC, convergence status, optimizer counts, and a simple maximum absolute
+parameter delta versus the reference fit. It preserves formula/DataFrame
+metadata where available and does not mutate the original fit. Stage 8A changes
+Python diagnostic plumbing only: no Rust likelihood formulas, Rust likelihood
+hot paths, new ecological model families, `occu`, distance-sampling models,
+dynamic/open models, Stage 8B parameter mapping helpers, Stage 8C generic
+simulation facades, or Stage 8D generic parametric-bootstrap facades are
+included.
+
 ## Core concepts
 
 ### `ProcessSpec`
@@ -231,8 +244,8 @@ This stage intentionally does not add or implement:
 - a new ecological model family;
 - occupancy (`occu`);
 - formula/newdata prediction beyond pcount fits created with `pcount_df`;
-- Stage 8 parity helpers;
-- K sensitivity helpers;
+- Stage 8B parameter mapping, Stage 8C generic simulate, or Stage 8D generic parboot helpers;
+- generic K sensitivity helpers beyond the pcount-specific Stage 8A helper;
 - generic simulate or parboot facades;
 - model averaging, refitting, stacking, or ensemble prediction;
 - new likelihoods;
