@@ -62,13 +62,70 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
     jobs = _as_mapping(_as_mapping(document).get("jobs"))
     full_check = _as_mapping(jobs.get("full-check"))
     full_check_steps = full_check.get("steps")
-    runs_full_check = isinstance(full_check_steps, list) and any(
-        _as_mapping(step).get("run") == "python scripts/check_all.py" for step in full_check_steps
+    full_check_candidates = (
+        [
+            _as_mapping(step)
+            for step in full_check_steps
+            if _as_mapping(step).get("run") == "python scripts/check_all.py"
+        ]
+        if isinstance(full_check_steps, list)
+        else []
     )
 
     violations: list[Violation] = []
-    if not runs_full_check:
+    if len(full_check_candidates) != 1:
         violations.append(Violation(path, "CI must run the repository-owned full check command"))
+    else:
+        full_check_step = full_check_candidates[0]
+        full_check_masking = (
+            "if" in full_check
+            or "continue-on-error" in full_check
+            or "if" in full_check_step
+            or "continue-on-error" in full_check_step
+            or full_check_step.get("shell") != "bash"
+        )
+        if full_check_masking:
+            violations.append(
+                Violation(path, "CI must use an unconditional full-check step with fail-fast Bash")
+            )
+
+    compatibility = _as_mapping(jobs.get("compatibility"))
+    if "if" in compatibility or "continue-on-error" in compatibility:
+        violations.append(Violation(path, "CI compatibility job must not mask failures"))
+
+    strategy = _as_mapping(compatibility.get("strategy"))
+    expected_matrix = {"python-version": ["3.12", "3.13"]}
+    if strategy.get("fail-fast") is not False or strategy.get("matrix") != expected_matrix:
+        violations.append(
+            Violation(path, "CI compatibility job must keep the Python 3.12/3.13 matrix")
+        )
+
+    compatibility_steps = compatibility.get("steps")
+    required_compatibility_commands = {
+        'python -m mypy --python-version "${{ matrix.python-version }}" python/pyabundance',
+        "python -m pytest -q",
+    }
+    valid_compatibility_commands: set[str] = set()
+    if isinstance(compatibility_steps, list):
+        for raw_step in compatibility_steps:
+            step = _as_mapping(raw_step)
+            run_command = step.get("run")
+            if (
+                isinstance(run_command, str)
+                and run_command in required_compatibility_commands
+                and step.get("shell") == "bash"
+                and "if" not in step
+                and "continue-on-error" not in step
+            ):
+                valid_compatibility_commands.add(str(run_command))
+    if valid_compatibility_commands != required_compatibility_commands:
+        violations.append(
+            Violation(
+                path,
+                "CI compatibility job must run mypy and pytest as unconditional fail-fast Bash "
+                "steps",
+            )
+        )
 
     merge_gate = _as_mapping(jobs.get("merge-gate"))
     if merge_gate.get("name") != "Merge gate" or merge_gate.get("if") != "always()":
