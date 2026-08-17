@@ -127,6 +127,66 @@ def test_ci_merge_gate_does_not_borrow_assertions_from_another_job() -> None:
     assert any("assert every dependency succeeded" in violation.message for violation in violations)
 
 
+def test_ci_merge_gate_rejects_continue_on_error() -> None:
+    text = """
+    jobs:
+      full-check:
+        steps:
+          - run: python scripts/check_all.py
+      compatibility:
+        steps:
+          - run: pytest
+      merge-gate:
+        name: Merge gate
+        if: always()
+        needs: [full-check, compatibility]
+        runs-on: ubuntu-latest
+        steps:
+          - name: Require every CI job to pass
+            continue-on-error: true
+            env:
+              FULL_CHECK_RESULT: ${{ needs.full-check.result }}
+              COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}
+            run: |
+              test "$FULL_CHECK_RESULT" = "success"
+              test "$COMPATIBILITY_RESULT" = "success"
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("canonical unconditional assertion step" in item.message for item in violations)
+
+
+def test_ci_merge_gate_rejects_conditional_assertion_step() -> None:
+    text = """
+    jobs:
+      full-check:
+        steps:
+          - run: python scripts/check_all.py
+      compatibility:
+        steps:
+          - run: pytest
+      merge-gate:
+        name: Merge gate
+        if: always()
+        needs: [full-check, compatibility]
+        runs-on: ubuntu-latest
+        steps:
+          - name: Require every CI job to pass
+            if: success()
+            env:
+              FULL_CHECK_RESULT: ${{ needs.full-check.result }}
+              COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}
+            run: |
+              test "$FULL_CHECK_RESULT" = "success"
+              test "$COMPATIBILITY_RESULT" = "success"
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("canonical unconditional assertion step" in item.message for item in violations)
+
+
 def test_detects_stale_macos_13_runner_label() -> None:
     violations = check_workflow_text(Path("wheels.yml"), "runs-on: macos-13\n")
     assert any("macos-13" in violation.message for violation in violations)
