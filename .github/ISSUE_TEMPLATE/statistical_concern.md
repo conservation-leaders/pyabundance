@@ -2,7 +2,7 @@
 name: Statistical concern
 about: Raise a modelling, inference, or diagnostics concern
 title: ""
-labels: "needs-triage"
+labels: "bug, needs-triage"
 assignees: ""
 ---
 

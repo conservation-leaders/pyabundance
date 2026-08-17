@@ -76,6 +76,57 @@ def test_ci_merge_gate_must_consume_every_dependency_result() -> None:
     assert any("dependency results" in violation.message for violation in violations)
 
 
+def test_ci_merge_gate_rejects_result_markers_without_success_assertions() -> None:
+    text = """
+    jobs:
+      full-check:
+        steps:
+          - run: python scripts/check_all.py
+      compatibility:
+        steps:
+          - run: pytest
+      merge-gate:
+        name: Merge gate
+        if: always()
+        needs: [full-check, compatibility]
+        # needs.full-check.result needs.compatibility.result
+        steps:
+          - run: "true"
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("assert every dependency succeeded" in violation.message for violation in violations)
+
+
+def test_ci_merge_gate_does_not_borrow_assertions_from_another_job() -> None:
+    text = """
+    jobs:
+      full-check:
+        steps:
+          - run: python scripts/check_all.py
+          - run: |
+              test "$FULL_CHECK_RESULT" = "success"
+              test "$COMPATIBILITY_RESULT" = "success"
+      compatibility:
+        steps:
+          - run: pytest
+      merge-gate:
+        name: Merge gate
+        if: always()
+        needs: [full-check, compatibility]
+        env:
+          FULL_CHECK_RESULT: ${{ needs.full-check.result }}
+          COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}
+        steps:
+          - run: "true"
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("assert every dependency succeeded" in violation.message for violation in violations)
+
+
 def test_detects_stale_macos_13_runner_label() -> None:
     violations = check_workflow_text(Path("wheels.yml"), "runs-on: macos-13\n")
     assert any("macos-13" in violation.message for violation in violations)

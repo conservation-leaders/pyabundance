@@ -41,6 +41,34 @@ def test_full_check_covers_every_gate() -> None:
         "PyO3 stub parity"
     )
 
+    commands = {check.name: check.command for check in check_all.CHECKS}
+    assert commands["Native extension editable build"] == (
+        check_all.PYTHON,
+        "-m",
+        "pip",
+        "install",
+        "--no-deps",
+        "--no-build-isolation",
+        "-e",
+        ".",
+    )
+    assert commands["PyO3 stub parity"] == (
+        check_all.PYTHON,
+        "-m",
+        "mypy.stubtest",
+        "pyabundance._core",
+    )
+    assert commands["Strict documentation build"] == (
+        check_all.PYTHON,
+        "-m",
+        "mkdocs",
+        "build",
+        "--strict",
+    )
+    coverage_command = commands["Python tests and coverage"]
+    assert "--cov=pyabundance" in coverage_command
+    assert "--cov-fail-under=80" in coverage_command
+
 
 def test_full_check_stops_after_first_failure() -> None:
     calls: list[tuple[str, ...]] = []

@@ -75,6 +75,16 @@ jobs:
 
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@1.83.0
+        with:
+          components: rustfmt, clippy
+
+      - name: Rust toolchain sanity check
+        run: |
+          rustup show
+          rustc --version
+          cargo --version
+          cargo fmt --version
+          cargo clippy --version
 
       - name: Install package and development dependencies
         run: |

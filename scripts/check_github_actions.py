@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import sys
+import textwrap
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -43,6 +44,21 @@ def _has_exact_runner_label(text: str, label: str) -> bool:
         rf"os:\s*{label_pattern}(?![-\w])",
     ]
     return any(re.search(pattern, text) for pattern in patterns)
+
+
+def _workflow_job_block(text: str, job_id: str) -> str | None:
+    normalized = textwrap.dedent(text)
+    job_pattern = re.compile(rf"^  {re.escape(job_id)}:\s*(?:#.*)?$", re.MULTILINE)
+    match = job_pattern.search(normalized)
+    if match is None:
+        return None
+    next_job = re.search(
+        r"^  [A-Za-z0-9_-]+:\s*(?:#.*)?$",
+        normalized[match.end() :],
+        re.MULTILINE,
+    )
+    end = match.end() + next_job.start() if next_job is not None else len(normalized)
+    return normalized[match.start() : end]
 
 
 def _require_platform_labels(path: Path, text: str) -> list[Violation]:
@@ -129,25 +145,38 @@ def check_workflow_text(path: Path, text: str) -> list[Violation]:
             )
 
     if path.name == "ci.yml":
-        if "python scripts/check_all.py" not in text:
+        full_check_job = _workflow_job_block(text, "full-check") or ""
+        merge_gate_job = _workflow_job_block(text, "merge-gate") or ""
+        active_lines = {
+            line.strip()
+            for line in merge_gate_job.splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        }
+        if "python scripts/check_all.py" not in full_check_job:
             violations.append(
                 Violation(path, "CI must run the repository-owned full check command")
             )
-        merge_gate_markers = ("\n  merge-gate:", "name: Merge gate", "if: always()")
-        if not all(marker in text for marker in merge_gate_markers):
+        merge_gate_markers = ("name: Merge gate", "if: always()")
+        if not merge_gate_job or not all(marker in merge_gate_job for marker in merge_gate_markers):
             violations.append(
                 Violation(path, "CI must expose a stable aggregate check named Merge gate")
             )
         if not re.search(
             r"needs:\s*\[\s*full-check\s*,\s*compatibility\s*\]",
-            text,
+            merge_gate_job,
         ):
             violations.append(
                 Violation(path, "Merge gate must depend on full-check and compatibility jobs")
             )
         result_markers = ("needs.full-check.result", "needs.compatibility.result")
-        if not all(marker in text for marker in result_markers):
+        if not all(marker in merge_gate_job for marker in result_markers):
             violations.append(Violation(path, "Merge gate must evaluate all dependency results"))
+        success_assertions = {
+            'test "$FULL_CHECK_RESULT" = "success"',
+            'test "$COMPATIBILITY_RESULT" = "success"',
+        }
+        if not success_assertions.issubset(active_lines):
+            violations.append(Violation(path, "Merge gate must assert every dependency succeeded"))
 
     return violations
 
