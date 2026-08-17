@@ -52,8 +52,9 @@ This project does not copy, inspect, translate, paraphrase, or mechanically port
 
 ## Reviewer request
 
-Please try the external alpha guide and record feedback in the pyabundance Linear project. Do not
-paste GPL source code into issues or PRs.
+Please try the external alpha guide and record feedback in the
+[pyabundance Linear project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
+on the Engineering (`ENG`) team. Do not paste GPL source code into issues or PRs.
 
 Recommended reviewer docs:
 

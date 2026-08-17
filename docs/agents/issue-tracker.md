@@ -9,7 +9,8 @@ source, pull requests, releases, and CI; do not duplicate project work in GitHub
 - Team: Engineering (`ENG`), ID `c7385d78-5319-49da-acab-2a8b9b7361ce`
 - Project: [Project Goanna - Map Visualisation and pyabundance](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
 - Project ID: `a8785575-89c3-450b-b8c3-4c7eb16e93f5`
-- Current unmarked realignment map: `ENG-18`
+- Current unmarked realignment map:
+  [Decide the behavior-complete clean-room unmarked compatibility surface](https://linear.app/conservation-leaders/issue/ENG-18/decide-the-behavior-complete-clean-room-unmarked-compatibility-surface)
 
 Use the connected Linear tools. If Linear is unavailable or authentication fails, stop and ask the
 user to connect it. Do not fall back to GitHub Issues, local Markdown tickets, or a second Linear
@@ -22,9 +23,11 @@ absent from an unscoped label listing.
 
 ## Read before write
 
-Resolve the team, project, issue, status, and labels before mutating tracker state. Read the full
-issue, comments, parent, and blocking relations when working from an `ENG-…` identifier. Search the
-project for an existing semantic match before creating an issue.
+Resolve the team, project, issue, status, labels, assignee, delegate, and blocking relations before
+mutating tracker state. For a Wayfinder claim, load only the map and enough child metadata to
+establish the frontier, then claim before reading the selected child's full body or doing work. For
+other mutations, read the full issue and comments first. Search the project for an existing
+semantic match before creating an issue.
 
 When creating or updating work:
 
@@ -53,8 +56,9 @@ A bare `ENG-42` means a Linear issue. A bare `#42` means a GitHub pull request o
 Linear identifier from a GitHub number.
 
 Linear's generated `gitBranchName` may violate the repository branch policy. Treat it as a title
-hint only. Build a compliant branch such as `feat/eng-42-short-description`, validate it, and start
-it from the default branch as required by `AGENTS.md`.
+hint only. When a governing ticket is known, use its real lowercase identifier; for example, this
+migration could use `chore/eng-40-configure-linear-tracker`. Otherwise omit the identifier. Validate
+the final branch name and start it from the default branch as required by `AGENTS.md`.
 
 ## Skill operations
 
@@ -72,7 +76,8 @@ it from the default branch as required by `AGENTS.md`.
 `/wayfinder` stores one Linear map issue and its decision/evidence tickets as child issues.
 
 - **Map**: use one issue labelled `wayfinder:map`, with Destination, Notes, Decisions so far, Not
-  yet specified, and Out of scope in its description. The current realignment map is `ENG-18`.
+  yet specified, and Out of scope in its description. The current realignment map is
+  [Decide the behavior-complete clean-room unmarked compatibility surface](https://linear.app/conservation-leaders/issue/ENG-18/decide-the-behavior-complete-clean-room-unmarked-compatibility-surface).
 - **Child ticket**: create the issue in the same team and project with the map as `parentId`. Apply
   exactly one `wayfinder:<type>` label. Unresolved grilling tickets also carry `ready-for-human`;
   completely specified AFK research and evidence tasks also carry `ready-for-agent`. Native

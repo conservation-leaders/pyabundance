@@ -9,9 +9,11 @@ Before changing implementation code or tests, read `CONTRIBUTING.md` and
 
 ### Issue tracker
 
-Issues, specifications, and Wayfinder maps are tracked in Linear on the Engineering (`ENG`) team.
-GitHub remains the code-review and CI surface, not a duplicate project tracker. See
-`docs/agents/issue-tracker.md` before reading or writing tracker state.
+Issues, specification approvals, and Wayfinder maps are tracked in the
+[pyabundance Linear project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
+on the Engineering (`ENG`) team. Versioned specification artifacts remain under `specs/` and link
+their governing Linear issue. GitHub remains the code-review and CI surface, not a duplicate
+project tracker. See `docs/agents/issue-tracker.md` before reading or writing tracker state.
 
 ### Triage labels
 
