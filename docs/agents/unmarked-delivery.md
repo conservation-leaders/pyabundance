@@ -39,6 +39,11 @@ Use `wayfinder:research` for public-source evidence gathering, `wayfinder:task` 
 experiments, and `wayfinder:grilling` for decisions. Do not use the generic throwaway prototype
 workflow for numerical methods whose evidence must be tested and retained.
 
+All governing issues live in the
+[pyabundance Linear project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
+on the Engineering (`ENG`) team. Versioned specifications remain under `specs/` and link their
+governing Linear issue.
+
 ## Ready-ticket contract
 
 An implementation issue is `ready-for-agent` only when it contains all of the following:
@@ -56,9 +61,10 @@ Unresolved scientific or API decisions use `ready-for-human`, not `ready-for-age
 
 ## One-ticket implementation loop
 
-1. Claim one unblocked, unassigned leaf issue and record the immutable base SHA.
-2. Read `AGENTS.md`, the clean-room policy, the issue, linked spec, relevant ADRs, and only the
-   code needed for that seam.
+1. Read `AGENTS.md`, the clean-room policy, the selected issue, linked spec, and relevant ADRs.
+   Confirm from tracker metadata that the issue is unblocked and unclaimed; do not inspect code yet.
+2. Claim the issue as the session's first write and record the immutable base SHA. Then read only
+   the code needed for that seam.
 3. Run focused baseline tests and `python scripts/check_all.py`. Stop if the baseline is red for a
    reason unrelated to the ticket.
 4. Add one failing behavior test at the public or cross-language seam. Use an independent expected
@@ -84,11 +90,12 @@ Every pull request must pass:
 python scripts/check_all.py
 ```
 
-GitHub branch protection requires the stable `Merge gate` check, an approving review, resolved
-conversations, and an up-to-date branch. Native-boundary changes also need focused dtype,
-non-contiguous-array, shape, keyword-signature, and error-mapping tests. Statistical changes need
-microcases with independently derived values, normalization checks, missing/extreme cases, and
-locked prior-family regressions.
+GitHub branch protection requires the stable `Merge gate` check, resolved conversations, and an
+up-to-date branch. The solo-maintainer configuration does not require a second-account approval;
+the independent Standards and Specification reviews remain mandatory. Native-boundary changes also
+need focused dtype, non-contiguous-array, shape, keyword-signature, and error-mapping tests.
+Statistical changes need microcases with independently derived values, normalization checks,
+missing/extreme cases, and locked prior-family regressions.
 
 Human promotion decisions are required after the common seam is proven by both pcount and occu,
 after generic inference is free of pcount coupling, before adopting the occuComm integration method,

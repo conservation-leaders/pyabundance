@@ -8,7 +8,7 @@ pyabundance keeps source, tests, docs, workflows, scripts, and benchmark generat
 - tests: `tests/`
 - benchmark scripts: `benchmarks/*.py`, `benchmarks/*.R`
 - docs: `docs/`, `README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `CITATION.cff`, `LICENSE`, `NOTICE`, `THIRD_PARTY_NOTICES.md`
-- workflows and templates: `.github/workflows/`, `.github/ISSUE_TEMPLATE/`, `.github/pull_request_template.md`
+- workflows and templates: `.github/workflows/`, `.github/ISSUE_TEMPLATE/config.yml`, `.github/pull_request_template.md`
 - scripts: `scripts/`
 - small packaged datasets, if any: `python/pyabundance/data/`
 - config: `pyproject.toml`, `Cargo.toml`, `Cargo.lock`, `rust-toolchain.toml`, `mkdocs.yml`

@@ -2,7 +2,7 @@
 
 ## Ticket and specification
 
-- Issue:
+- Linear issue URL ([Engineering `ENG` project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)):
 - Specification / ADR:
 - Delivery seam:
 

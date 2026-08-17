@@ -71,7 +71,10 @@ print(poisson.to_markdown(include_posterior_abundance=True))
 
 ## Issue types
 
-Use the issue templates for bugs, docs, features, and statistical concerns.
+Record bugs, documentation gaps, feature requests, and statistical concerns in the
+[pyabundance Linear project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
+on the Engineering (`ENG`) team. Ask the release coordinator for workspace access before beginning
+the review.
 
 ## Clean-room reminder
 

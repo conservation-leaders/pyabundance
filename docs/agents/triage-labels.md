@@ -1,7 +1,7 @@
 # Triage labels
 
-The skills use five canonical triage roles. This table maps each role to the GitHub label name
-for this repository.
+The skills use five canonical triage roles. The names below exist on the Linear Engineering team
+and are the repository mapping.
 
 | Label in `mattpocock/skills` | Label in this repository | Meaning                                  |
 | ---------------------------- | ------------------------ | ---------------------------------------- |
@@ -13,9 +13,9 @@ for this repository.
 
 When a skill mentions a role, use the corresponding label in the right-hand column.
 
-The mapping assumes those labels already exist in GitHub. `/triage` does not create labels; if
-a mapped label is missing, stop and have a maintainer create it instead of substituting a
-different label.
+Linear workflow statuses and category labels such as `Bug`, `Feature`, and `Improvement` do not
+replace these triage roles. `/triage` does not create labels; if a mapped label is missing, stop and
+have a maintainer restore the exact name instead of substituting a different label.
 
 ## Wayfinder work types
 
@@ -29,5 +29,9 @@ Wayfinder issues use one additional label describing their role:
 | `wayfinder:grilling` | Human decision and stress test |
 | `wayfinder:task` | Bounded retained investigation or setup work |
 
-Use exactly one Wayfinder type on each map/child issue. Read
-`docs/agents/unmarked-delivery.md` before using these labels for the realignment program.
+Use exactly one Wayfinder type on each map/child issue. An unresolved `wayfinder:grilling` child
+also carries `ready-for-human`. A completely specified AFK research or retained-evidence child
+carries `ready-for-agent`; its native blockers still determine whether it is on the frontier.
+Implementation tickets use `ready-for-agent` only when they satisfy the delivery playbook's
+ready-ticket contract. Read `docs/agents/unmarked-delivery.md` before using these labels for the
+realignment program.

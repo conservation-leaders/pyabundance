@@ -14,7 +14,10 @@ Please try:
 2. Run the external alpha smoke example.
 3. Fit Poisson, negative-binomial, and ZIP pcount models using the bundled dataset.
 4. Inspect coefficient summaries, uncertainty outputs, posterior abundance outputs, and model reports.
-5. File issues or send feedback using the reviewer feedback template.
+5. Record feedback in the
+   [pyabundance Linear project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
+   on the Engineering (`ENG`) team using the reviewer feedback template. Ask the release coordinator
+   for workspace access if needed.
 
 Clean-room note:
 Please do not paste GPL R package source code into issues, PRs, comments, or feedback. Behavioural comparisons, public docs, published equations, and black-box output comparisons are welcome.

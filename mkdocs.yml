@@ -32,6 +32,8 @@ nav:
   - Development:
       - Contributor Onboarding: CONTRIBUTOR_ONBOARDING.md
       - Contributing: development/CONTRIBUTING.md
+      - Issue Tracker: agents/issue-tracker.md
+      - Triage Labels: agents/triage-labels.md
       - Clean-room Policy: development/CLEAN_ROOM_POLICY.md
       - Repository Hygiene: development/REPOSITORY_HYGIENE.md
       - Performance Architecture: development/PERFORMANCE_ARCHITECTURE.md
