@@ -7,11 +7,13 @@ v0.6 adds applied-workflow helpers for comparing fitted pcount models, exporting
 ```python
 from pyabundance import aic_table, compare_models
 
-table = aic_table({
-    "poisson": fit_p,
-    "negative_binomial": fit_nb,
-    "zip": fit_zip,
-})
+table = aic_table(
+    {
+        "poisson": fit_p,
+        "negative_binomial": fit_nb,
+        "zip": fit_zip,
+    }
+)
 print(table)
 ```
 

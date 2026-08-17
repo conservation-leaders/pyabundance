@@ -92,6 +92,19 @@ of truth for simulation math and stable user-facing APIs. Stage 8B does not add
 new ecological model families, `occu`, distance-sampling models, dynamic/open
 models, parameter mapping helpers, or a generic parametric-bootstrap facade.
 
+Stage 8C adds experimental pcount-specific parameter mapping helpers in
+`pyabundance.pcount_mapping`. `pcount_parameter_mapping(result)` accepts a
+`PCountResult` and returns a compact object with a `.table` DataFrame and
+`.summary()` metadata. The table describes how the fitted pcount coefficient
+vector maps to pyabundance process names (`lambda`, `p`, and mixture-specific
+`r` or `psi`), links, process levels, shared-core `ParameterBlock` ranges,
+formulas, fitted column names, transformed extra parameters, and common
+pcount/unmarked-style terminology. This is descriptive metadata only: Stage 8C
+does not alter Rust likelihood formulas or hot paths, fitting, prediction,
+simulation, bootstrap, model-selection behavior, stable pcount APIs, or
+top-level `pyabundance.__all__`. It does not require R, `unmarked`, external
+data downloads, generated reports, or generated artifacts.
+
 ## Core concepts
 
 ### `ProcessSpec`
@@ -241,6 +254,21 @@ The pcount adapter maps existing pcount metadata into shared-core concepts:
 
 `PCountResult.model_spec.metadata` includes the mixture, truncation value `K`, whether the fit came from the DataFrame API, and the response dimensions.
 
+Stage 8C exposes this mapping as descriptive table data through
+`pyabundance.pcount_mapping.pcount_parameter_mapping()`. The helper validates
+that `PCountResult.parameter_blocks` exactly cover `result.params` and then
+emits one row per coefficient with parameter-vector indices, block start/stop
+positions, process names, links, levels, estimates, formulas, fitted design
+columns, model metadata, and public pcount/unmarked-style terms. For
+negative-binomial fits the `log_r` row includes transformed `r = result.r`; for
+ZIP fits the `logit_psi` row includes transformed `psi = result.psi`.
+
+These helpers are experimental and pcount-specific. They are intended for
+inspection and documentation only, not as a fitting, prediction, simulation,
+bootstrap, model-selection, or generic shared-core facade. The unmarked-style
+terms are public-facing vocabulary used to orient users; they are not derived
+from inspecting, translating, copying, or paraphrasing GPL source code.
+
 `FramePCount` uses the same vocabulary for pcount design data: abundance
 formulas describe the `lambda` process with a `log` link at the site level, and
 detection formulas describe the `p` process with a `logit` link at the
@@ -255,7 +283,7 @@ This stage intentionally does not add or implement:
 - a new ecological model family;
 - occupancy (`occu`);
 - formula/newdata prediction beyond pcount fits created with `pcount_df`;
-- parameter mapping helpers;
+- generic parameter mapping helpers beyond the pcount-specific Stage 8C helper;
 - generic K sensitivity helpers beyond the pcount-specific Stage 8A helper;
 - generic parboot facades;
 - model averaging, refitting, stacking, or ensemble prediction;

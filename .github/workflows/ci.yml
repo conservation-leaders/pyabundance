@@ -60,7 +60,7 @@ jobs:
         run: ruff check .
 
       - name: Mypy
-        run: mypy python/pyabundance
+        run: mypy --python-version "${{ matrix.python-version }}" python/pyabundance
 
       - name: Pytest
         run: pytest -q

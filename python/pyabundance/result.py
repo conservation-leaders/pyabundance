@@ -529,10 +529,10 @@ class PCountResult:
                 as_dataframe=as_dataframe,
             )
         w_arr = self.W if W is None else np.ascontiguousarray(W, dtype=np.float64)
-        values = np.asarray(
+        flat_values = np.asarray(
             _core.pcount_poisson_predict_detection(w_arr, self.detection), dtype=np.float64
         )
-        values = values.reshape(w_arr.shape[0], w_arr.shape[1])
+        values = flat_values.reshape(w_arr.shape[0], w_arr.shape[1])
         if not se and not interval:
             if as_dataframe:
                 rows = []
