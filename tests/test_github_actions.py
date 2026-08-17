@@ -28,6 +28,11 @@ jobs:
       matrix:
         python-version: ["3.12", "3.13"]
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
       - name: Type check supported Python version
         shell: bash
         run: python -m mypy --python-version "${{ matrix.python-version }}" python/pyabundance
@@ -297,6 +302,28 @@ def test_ci_requires_compatibility_typecheck_and_tests() -> None:
     violations = check_workflow_text(Path("ci.yml"), text)
 
     assert any("compatibility job must run mypy and pytest" in item.message for item in violations)
+
+
+def test_ci_requires_setup_for_each_compatibility_interpreter() -> None:
+    text = VALID_MINIMAL_CI.replace(
+        "          python-version: ${{ matrix.python-version }}",
+        '          python-version: "3.11"',
+    )
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("configure each matrix interpreter" in item.message for item in violations)
+
+
+def test_ci_rejects_test_control_environment_overrides() -> None:
+    text = VALID_MINIMAL_CI.replace(
+        "  compatibility:\n    strategy:",
+        "  compatibility:\n    env:\n      PYTEST_ADDOPTS: --collect-only\n    strategy:",
+    )
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("test-control environment" in item.message for item in violations)
 
 
 def test_detects_stale_macos_13_runner_label() -> None:

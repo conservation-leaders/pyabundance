@@ -59,7 +59,8 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
     except yaml.YAMLError:
         return [Violation(path, "CI workflow must be valid YAML")]
 
-    jobs = _as_mapping(_as_mapping(document).get("jobs"))
+    workflow = _as_mapping(document)
+    jobs = _as_mapping(workflow.get("jobs"))
     full_check = _as_mapping(jobs.get("full-check"))
     full_check_steps = full_check.get("steps")
     full_check_candidates = (
@@ -83,6 +84,8 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
             or "if" in full_check_step
             or "continue-on-error" in full_check_step
             or full_check_step.get("shell") != "bash"
+            or "env" in full_check_step
+            or "working-directory" in full_check_step
         )
         if full_check_masking:
             violations.append(
@@ -116,6 +119,8 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
                 and step.get("shell") == "bash"
                 and "if" not in step
                 and "continue-on-error" not in step
+                and "env" not in step
+                and "working-directory" not in step
             ):
                 valid_compatibility_commands.add(str(run_command))
     if valid_compatibility_commands != required_compatibility_commands:
@@ -125,6 +130,57 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
                 "CI compatibility job must run mypy and pytest as unconditional fail-fast Bash "
                 "steps",
             )
+        )
+
+    setup_python_steps = (
+        [
+            _as_mapping(step)
+            for step in compatibility_steps
+            if _as_mapping(step).get("uses") == "actions/setup-python@v5"
+        ]
+        if isinstance(compatibility_steps, list)
+        else []
+    )
+    expected_python_setup = {
+        "python-version": "${{ matrix.python-version }}",
+        "cache": "pip",
+    }
+    valid_python_setup = (
+        len(setup_python_steps) == 1
+        and setup_python_steps[0].get("with") == expected_python_setup
+        and "if" not in setup_python_steps[0]
+        and "continue-on-error" not in setup_python_steps[0]
+        and "env" not in setup_python_steps[0]
+    )
+    if not valid_python_setup:
+        violations.append(
+            Violation(path, "CI compatibility job must configure each matrix interpreter")
+        )
+
+    forbidden_environment = {
+        "COVERAGE_PROCESS_START",
+        "COVERAGE_RCFILE",
+        "MYPY_CONFIG_FILE",
+        "MYPYPATH",
+        "PATH",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS",
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "VIRTUAL_ENV",
+    }
+    environment_owners = [workflow, full_check, compatibility]
+    for job_steps in (full_check_steps, compatibility_steps):
+        if isinstance(job_steps, list):
+            environment_owners.extend(_as_mapping(step) for step in job_steps)
+    has_test_control_environment = any(
+        forbidden_environment.intersection(_as_mapping(owner.get("env")))
+        for owner in environment_owners
+    )
+    has_run_defaults = any("defaults" in owner for owner in (workflow, full_check, compatibility))
+    if has_test_control_environment or has_run_defaults:
+        violations.append(
+            Violation(path, "CI test-control environment and run defaults must remain unset")
         )
 
     merge_gate = _as_mapping(jobs.get("merge-gate"))
