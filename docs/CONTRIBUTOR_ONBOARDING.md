@@ -12,20 +12,18 @@ Do not copy, inspect, translate, paraphrase, or mechanically port GPL R/C/C++/TM
 python -m venv .venv
 . .venv/bin/activate || source .venv/bin/activate
 python -m pip install --upgrade pip
-python -m pip install -e '.[dev]'
-maturin develop --release
+python -m pip install -e '.[dev,docs]'
 ```
 
 ## Standard validation
 
 ```bash
-cargo fmt --all -- --check
-cargo test
-cargo clippy --all-targets --all-features -- -D warnings
-ruff check .
-mypy
-pytest -q
+python scripts/check_all.py
 ```
+
+This is the same full gate CI runs. It refreshes the editable PyO3 extension before testing the
+Python/native boundary, so run it from an activated development environment with maturin and the
+documentation dependencies installed.
 
 ## Project layout
 

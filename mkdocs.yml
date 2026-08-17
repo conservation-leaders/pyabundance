@@ -38,6 +38,7 @@ nav:
       - Shared Core Architecture: development/SHARED_CORE_ARCHITECTURE.md
       - Unmarked Feature Contract: development/UNMARKED_FEATURE_CONTRACT.md
       - Unmarked Realignment Architecture: development/UNMARKED_REALIGNMENT_ARCHITECTURE.md
+      - Agent Delivery Playbook: agents/unmarked-delivery.md
       - GitHub Actions: development/GITHUB_ACTIONS.md
       - GitHub Actions Stabilization: development/GITHUB_ACTIONS_STABILIZATION.md
       - Cleanup Inventory: development/CLEANUP_INVENTORY.md

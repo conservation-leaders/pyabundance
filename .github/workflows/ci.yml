@@ -2,28 +2,27 @@ name: CI
 
 on:
   push:
-    branches: [main, repo-cleanup-before-external-alpha, github-actions-stabilization]
+    branches: [main]
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
-  test:
-    name: Test Python ${{ matrix.python-version }}
+  full-check:
+    name: Full check
     runs-on: ubuntu-latest
     env:
       RUSTUP_TOOLCHAIN: 1.83.0
       CARGO_TERM_COLOR: always
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
           cache: pip
 
       - name: Set up Rust
@@ -39,45 +38,65 @@ jobs:
           cargo fmt --version
           cargo clippy --version
 
-      - name: Install package and dev dependencies
+      - name: Install package and development dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install -e '.[dev,docs,release]'
+          python -m pip install -e '.[dev,docs]'
 
-      - name: Rust format
-        run: cargo fmt --all -- --check
-
-      - name: Rust tests
-        run: cargo test
-
-      - name: Rust clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
-
-      - name: Ruff format
-        run: ruff format --check .
-
-      - name: Ruff check
-        run: ruff check .
-
-      - name: Mypy
-        run: mypy --python-version "${{ matrix.python-version }}" python/pyabundance
-
-      - name: Pytest
-        run: pytest -q
-
-      - name: Coverage
-        if: matrix.python-version == '3.11'
-        run: pytest --cov=pyabundance --cov-report=term-missing --cov-report=xml --cov-fail-under=80
-
-      - name: Repository hygiene
-        run: python scripts/check_repo_hygiene.py
-
-      - name: GitHub Actions sanity
-        run: python scripts/check_github_actions.py
+      - name: Run full repository check
+        run: python scripts/check_all.py
 
       - name: Upload coverage XML
-        if: matrix.python-version == '3.11'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.python-version }}
+          name: coverage-3.11
           path: coverage.xml
+          if-no-files-found: ignore
+
+  compatibility:
+    name: Python ${{ matrix.python-version }} compatibility
+    runs-on: ubuntu-latest
+    env:
+      RUSTUP_TOOLCHAIN: 1.83.0
+      CARGO_TERM_COLOR: always
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@1.83.0
+
+      - name: Install package and development dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e '.[dev]'
+
+      - name: Type check supported Python version
+        run: python -m mypy --python-version "${{ matrix.python-version }}" python/pyabundance
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  merge-gate:
+    name: Merge gate
+    if: always()
+    needs: [full-check, compatibility]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every CI job to pass
+        env:
+          FULL_CHECK_RESULT: ${{ needs.full-check.result }}
+          COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}
+        run: |
+          test "$FULL_CHECK_RESULT" = "success"
+          test "$COMPATIBILITY_RESULT" = "success"

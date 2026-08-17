@@ -128,6 +128,27 @@ def check_workflow_text(path: Path, text: str) -> list[Violation]:
                 )
             )
 
+    if path.name == "ci.yml":
+        if "python scripts/check_all.py" not in text:
+            violations.append(
+                Violation(path, "CI must run the repository-owned full check command")
+            )
+        merge_gate_markers = ("\n  merge-gate:", "name: Merge gate", "if: always()")
+        if not all(marker in text for marker in merge_gate_markers):
+            violations.append(
+                Violation(path, "CI must expose a stable aggregate check named Merge gate")
+            )
+        if not re.search(
+            r"needs:\s*\[\s*full-check\s*,\s*compatibility\s*\]",
+            text,
+        ):
+            violations.append(
+                Violation(path, "Merge gate must depend on full-check and compatibility jobs")
+            )
+        result_markers = ("needs.full-check.result", "needs.compatibility.result")
+        if not all(marker in text for marker in result_markers):
+            violations.append(Violation(path, "Merge gate must evaluate all dependency results"))
+
     return violations
 
 

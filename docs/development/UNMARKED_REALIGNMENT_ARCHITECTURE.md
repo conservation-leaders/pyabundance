@@ -426,12 +426,14 @@ class PreparedModel:
     data_signature: str
     family_options: Mapping[str, object]
 
+
 @dataclass(frozen=True)
 class FitRecipe:
     prepared_model: PreparedModel
     starts: NDArray[np.float64]
     optimizer: OptimizerSettings
     covariance: CovarianceSettings
+
 
 class FitResult:
     recipe: FitRecipe

@@ -20,6 +20,62 @@ def test_current_github_actions_workflows_pass_policy() -> None:
     assert check_workflows() == []
 
 
+def test_ci_requires_a_stable_merge_gate() -> None:
+    text = """
+    jobs:
+      test:
+        runs-on: ubuntu-latest
+        steps:
+          - run: pytest
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("Merge gate" in violation.message for violation in violations)
+
+
+def test_ci_merge_gate_must_depend_on_all_test_jobs() -> None:
+    text = """
+    jobs:
+      full-check:
+        steps:
+          - run: python scripts/check_all.py
+      compatibility:
+        steps:
+          - run: pytest
+      merge-gate:
+        name: Merge gate
+        if: always()
+        needs: [full-check]
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("full-check and compatibility" in violation.message for violation in violations)
+
+
+def test_ci_merge_gate_must_consume_every_dependency_result() -> None:
+    text = """
+    jobs:
+      full-check:
+        steps:
+          - run: python scripts/check_all.py
+      compatibility:
+        steps:
+          - run: pytest
+      merge-gate:
+        name: Merge gate
+        if: always()
+        needs: [full-check, compatibility]
+        steps:
+          - run: "true"
+    """
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("dependency results" in violation.message for violation in violations)
+
+
 def test_detects_stale_macos_13_runner_label() -> None:
     violations = check_workflow_text(Path("wheels.yml"), "runs-on: macos-13\n")
     assert any("macos-13" in violation.message for violation in violations)
