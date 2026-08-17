@@ -92,6 +92,26 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
                 Violation(path, "CI must use an unconditional full-check step with fail-fast Bash")
             )
 
+    full_check_python_setup = (
+        [
+            _as_mapping(step)
+            for step in full_check_steps
+            if _as_mapping(step).get("uses") == "actions/setup-python@v5"
+        ]
+        if isinstance(full_check_steps, list)
+        else []
+    )
+    expected_full_check_python = {"python-version": "3.11", "cache": "pip"}
+    valid_full_check_python = (
+        len(full_check_python_setup) == 1
+        and full_check_python_setup[0].get("with") == expected_full_check_python
+        and "if" not in full_check_python_setup[0]
+        and "continue-on-error" not in full_check_python_setup[0]
+        and "env" not in full_check_python_setup[0]
+    )
+    if not valid_full_check_python:
+        violations.append(Violation(path, "CI full-check job must configure Python 3.11"))
+
     compatibility = _as_mapping(jobs.get("compatibility"))
     if "if" in compatibility or "continue-on-error" in compatibility:
         violations.append(Violation(path, "CI compatibility job must not mask failures"))

@@ -19,6 +19,11 @@ VALID_MINIMAL_CI = """
 jobs:
   full-check:
     steps:
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
       - name: Run full repository check
         shell: bash
         run: python scripts/check_all.py
@@ -313,6 +318,17 @@ def test_ci_requires_setup_for_each_compatibility_interpreter() -> None:
     violations = check_workflow_text(Path("ci.yml"), text)
 
     assert any("configure each matrix interpreter" in item.message for item in violations)
+
+
+def test_ci_requires_python_311_for_full_check() -> None:
+    text = VALID_MINIMAL_CI.replace(
+        '          python-version: "3.11"',
+        '          python-version: "3.12"',
+    )
+
+    violations = check_workflow_text(Path("ci.yml"), text)
+
+    assert any("configure Python 3.11" in item.message for item in violations)
 
 
 def test_ci_rejects_test_control_environment_overrides() -> None:
