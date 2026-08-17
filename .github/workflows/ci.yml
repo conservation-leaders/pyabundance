@@ -104,6 +104,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Require every CI job to pass
+        shell: bash
         env:
           FULL_CHECK_RESULT: ${{ needs.full-check.result }}
           COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}

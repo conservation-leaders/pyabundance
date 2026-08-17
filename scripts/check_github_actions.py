@@ -109,6 +109,8 @@ def _check_ci_structure(path: Path, text: str) -> list[Violation]:
                 "assert every dependency succeeded",
             )
         )
+    if assertion_step.get("shell") != "bash":
+        violations.append(Violation(path, "Merge gate must use an explicit fail-fast Bash shell"))
 
     return violations
 
