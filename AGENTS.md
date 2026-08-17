@@ -9,8 +9,9 @@ Before changing implementation code or tests, read `CONTRIBUTING.md` and
 
 ### Issue tracker
 
-Issues and specs are tracked in GitHub Issues for `conservation-leaders/pyabundance`. See
-`docs/agents/issue-tracker.md`.
+Issues, specifications, and Wayfinder maps are tracked in Linear on the Engineering (`ENG`) team.
+GitHub remains the code-review and CI surface, not a duplicate project tracker. See
+`docs/agents/issue-tracker.md` before reading or writing tracker state.
 
 ### Triage labels
 
@@ -25,5 +26,6 @@ See `docs/agents/domain.md`.
 ### Unmarked realignment delivery
 
 Before planning or implementing any realignment ticket, read
-`docs/agents/unmarked-delivery.md`. Run `python scripts/check_all.py` before claiming a clean
-baseline and again before handing work off.
+`docs/agents/unmarked-delivery.md`. Implementation sessions run `python scripts/check_all.py`
+before claiming a clean baseline and again before handoff. Planning and tracker-only sessions use
+the latest green `main` CI unless they change repository files.

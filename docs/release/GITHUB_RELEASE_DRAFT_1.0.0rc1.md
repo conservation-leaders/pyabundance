@@ -52,7 +52,8 @@ This project does not copy, inspect, translate, paraphrase, or mechanically port
 
 ## Reviewer request
 
-Please try the external alpha guide and file issues using the templates. Do not paste GPL source code into issues or PRs.
+Please try the external alpha guide and record feedback in the pyabundance Linear project. Do not
+paste GPL source code into issues or PRs.
 
 Recommended reviewer docs:
 

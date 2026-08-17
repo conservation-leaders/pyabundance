@@ -35,6 +35,13 @@ documentation dependencies installed.
 - `specs`: clean-room mathematical and validation specifications.
 - `docs`: user and contributor documentation.
 
+## Project tracker
+
+Issues, specifications, and Wayfinder maps live in the
+[pyabundance Linear project](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
+on the Engineering (`ENG`) team. GitHub remains the pull-request and CI surface. Link the governing
+`ENG-…` issue from every implementation pull request.
+
 ## Contribution style
 
 - Keep likelihood changes small, tested, and documented.

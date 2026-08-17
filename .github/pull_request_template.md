@@ -2,7 +2,7 @@
 
 ## Ticket and specification
 
-- Issue:
+- Linear issue (`ENG-…`):
 - Specification / ADR:
 - Delivery seam:
 

@@ -84,11 +84,12 @@ Every pull request must pass:
 python scripts/check_all.py
 ```
 
-GitHub branch protection requires the stable `Merge gate` check, an approving review, resolved
-conversations, and an up-to-date branch. Native-boundary changes also need focused dtype,
-non-contiguous-array, shape, keyword-signature, and error-mapping tests. Statistical changes need
-microcases with independently derived values, normalization checks, missing/extreme cases, and
-locked prior-family regressions.
+GitHub branch protection requires the stable `Merge gate` check, resolved conversations, and an
+up-to-date branch. The solo-maintainer configuration does not require a second-account approval;
+the independent Standards and Specification reviews remain mandatory. Native-boundary changes also
+need focused dtype, non-contiguous-array, shape, keyword-signature, and error-mapping tests.
+Statistical changes need microcases with independently derived values, normalization checks,
+missing/extreme cases, and locked prior-family regressions.
 
 Human promotion decisions are required after the common seam is proven by both pcount and occu,
 after generic inference is free of pcount coupling, before adopting the occuComm integration method,

@@ -4,7 +4,7 @@
 
 - Status: draft | approved | implemented
 - Human approver:
-- Governing issue:
+- Governing Linear issue (`ENG-…`):
 - Related ADRs:
 
 ## Clean-room provenance
