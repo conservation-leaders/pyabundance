@@ -34,7 +34,7 @@ Changelog = "https://github.com/conservation-leaders/pyabundance/blob/main/CHANG
 
 [project.optional-dependencies]
 test = ["pytest", "pytest-cov"]
-dev = ["pytest", "pytest-cov", "pytest-benchmark", "ruff", "mypy", "maturin"]
+dev = ["pytest", "pytest-cov", "pytest-benchmark", "ruff", "mypy", "maturin", "PyYAML"]
 docs = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 benchmark = ["pytest-benchmark"]
 release = ["build", "twine", "maturin"]

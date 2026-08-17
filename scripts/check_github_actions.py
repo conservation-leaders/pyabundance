@@ -5,6 +5,8 @@ import sys
 from dataclasses import dataclass
 from pathlib import Path
 
+import yaml
+
 WORKFLOW_DIR = Path(".github/workflows")
 TOOLCHAIN_FILE = Path("rust-toolchain.toml")
 REQUIRED_RUST_TOOLCHAIN = "1.83.0"
@@ -43,6 +45,207 @@ def _has_exact_runner_label(text: str, label: str) -> bool:
         rf"os:\s*{label_pattern}(?![-\w])",
     ]
     return any(re.search(pattern, text) for pattern in patterns)
+
+
+def _as_mapping(value: object) -> dict[str, object]:
+    if isinstance(value, dict):
+        return {key: item for key, item in value.items() if isinstance(key, str)}
+    return {}
+
+
+def _check_ci_structure(path: Path, text: str) -> list[Violation]:
+    try:
+        document = yaml.safe_load(text)
+    except yaml.YAMLError:
+        return [Violation(path, "CI workflow must be valid YAML")]
+
+    workflow = _as_mapping(document)
+    jobs = _as_mapping(workflow.get("jobs"))
+    full_check = _as_mapping(jobs.get("full-check"))
+    full_check_steps = full_check.get("steps")
+    full_check_candidates = (
+        [
+            _as_mapping(step)
+            for step in full_check_steps
+            if _as_mapping(step).get("run") == "python scripts/check_all.py"
+        ]
+        if isinstance(full_check_steps, list)
+        else []
+    )
+
+    violations: list[Violation] = []
+    if len(full_check_candidates) != 1:
+        violations.append(Violation(path, "CI must run the repository-owned full check command"))
+    else:
+        full_check_step = full_check_candidates[0]
+        full_check_masking = (
+            "if" in full_check
+            or "continue-on-error" in full_check
+            or "if" in full_check_step
+            or "continue-on-error" in full_check_step
+            or full_check_step.get("shell") != "bash"
+            or "env" in full_check_step
+            or "working-directory" in full_check_step
+        )
+        if full_check_masking:
+            violations.append(
+                Violation(path, "CI must use an unconditional full-check step with fail-fast Bash")
+            )
+
+    full_check_python_setup = (
+        [
+            _as_mapping(step)
+            for step in full_check_steps
+            if _as_mapping(step).get("uses") == "actions/setup-python@v5"
+        ]
+        if isinstance(full_check_steps, list)
+        else []
+    )
+    expected_full_check_python = {"python-version": "3.11", "cache": "pip"}
+    valid_full_check_python = (
+        len(full_check_python_setup) == 1
+        and full_check_python_setup[0].get("with") == expected_full_check_python
+        and "if" not in full_check_python_setup[0]
+        and "continue-on-error" not in full_check_python_setup[0]
+        and "env" not in full_check_python_setup[0]
+    )
+    if not valid_full_check_python:
+        violations.append(Violation(path, "CI full-check job must configure Python 3.11"))
+
+    compatibility = _as_mapping(jobs.get("compatibility"))
+    if "if" in compatibility or "continue-on-error" in compatibility:
+        violations.append(Violation(path, "CI compatibility job must not mask failures"))
+
+    strategy = _as_mapping(compatibility.get("strategy"))
+    expected_matrix = {"python-version": ["3.12", "3.13"]}
+    if strategy.get("fail-fast") is not False or strategy.get("matrix") != expected_matrix:
+        violations.append(
+            Violation(path, "CI compatibility job must keep the Python 3.12/3.13 matrix")
+        )
+
+    compatibility_steps = compatibility.get("steps")
+    required_compatibility_commands = {
+        'python -m mypy --python-version "${{ matrix.python-version }}" python/pyabundance',
+        "python -m pytest -q",
+    }
+    valid_compatibility_commands: set[str] = set()
+    if isinstance(compatibility_steps, list):
+        for raw_step in compatibility_steps:
+            step = _as_mapping(raw_step)
+            run_command = step.get("run")
+            if (
+                isinstance(run_command, str)
+                and run_command in required_compatibility_commands
+                and step.get("shell") == "bash"
+                and "if" not in step
+                and "continue-on-error" not in step
+                and "env" not in step
+                and "working-directory" not in step
+            ):
+                valid_compatibility_commands.add(str(run_command))
+    if valid_compatibility_commands != required_compatibility_commands:
+        violations.append(
+            Violation(
+                path,
+                "CI compatibility job must run mypy and pytest as unconditional fail-fast Bash "
+                "steps",
+            )
+        )
+
+    setup_python_steps = (
+        [
+            _as_mapping(step)
+            for step in compatibility_steps
+            if _as_mapping(step).get("uses") == "actions/setup-python@v5"
+        ]
+        if isinstance(compatibility_steps, list)
+        else []
+    )
+    expected_python_setup = {
+        "python-version": "${{ matrix.python-version }}",
+        "cache": "pip",
+    }
+    valid_python_setup = (
+        len(setup_python_steps) == 1
+        and setup_python_steps[0].get("with") == expected_python_setup
+        and "if" not in setup_python_steps[0]
+        and "continue-on-error" not in setup_python_steps[0]
+        and "env" not in setup_python_steps[0]
+    )
+    if not valid_python_setup:
+        violations.append(
+            Violation(path, "CI compatibility job must configure each matrix interpreter")
+        )
+
+    forbidden_environment = {
+        "COVERAGE_PROCESS_START",
+        "COVERAGE_RCFILE",
+        "MYPY_CONFIG_FILE",
+        "MYPYPATH",
+        "PATH",
+        "PYTEST_ADDOPTS",
+        "PYTEST_PLUGINS",
+        "PYTHONHOME",
+        "PYTHONPATH",
+        "VIRTUAL_ENV",
+    }
+    environment_owners = [workflow, full_check, compatibility]
+    for job_steps in (full_check_steps, compatibility_steps):
+        if isinstance(job_steps, list):
+            environment_owners.extend(_as_mapping(step) for step in job_steps)
+    has_test_control_environment = any(
+        forbidden_environment.intersection(_as_mapping(owner.get("env")))
+        for owner in environment_owners
+    )
+    has_run_defaults = any("defaults" in owner for owner in (workflow, full_check, compatibility))
+    if has_test_control_environment or has_run_defaults:
+        violations.append(
+            Violation(path, "CI test-control environment and run defaults must remain unset")
+        )
+
+    merge_gate = _as_mapping(jobs.get("merge-gate"))
+    if merge_gate.get("name") != "Merge gate" or merge_gate.get("if") != "always()":
+        violations.append(
+            Violation(path, "CI must expose a stable aggregate check named Merge gate")
+        )
+
+    if merge_gate.get("needs") != ["full-check", "compatibility"]:
+        violations.append(
+            Violation(path, "Merge gate must depend on full-check and compatibility jobs")
+        )
+
+    steps = merge_gate.get("steps")
+    assertion_step = _as_mapping(steps[0]) if isinstance(steps, list) and len(steps) == 1 else {}
+    expected_environment = {
+        "FULL_CHECK_RESULT": "${{ needs.full-check.result }}",
+        "COMPATIBILITY_RESULT": "${{ needs.compatibility.result }}",
+    }
+    if assertion_step.get("env") != expected_environment:
+        violations.append(Violation(path, "Merge gate must evaluate all dependency results"))
+
+    run_value = assertion_step.get("run")
+    run_lines = run_value.strip().splitlines() if isinstance(run_value, str) else []
+    expected_assertions = [
+        'test "$FULL_CHECK_RESULT" = "success"',
+        'test "$COMPATIBILITY_RESULT" = "success"',
+    ]
+    failure_masking = (
+        "if" in assertion_step
+        or "continue-on-error" in assertion_step
+        or "continue-on-error" in merge_gate
+    )
+    if run_lines != expected_assertions or failure_masking:
+        violations.append(
+            Violation(
+                path,
+                "Merge gate must use one canonical unconditional assertion step and "
+                "assert every dependency succeeded",
+            )
+        )
+    if assertion_step.get("shell") != "bash":
+        violations.append(Violation(path, "Merge gate must use an explicit fail-fast Bash shell"))
+
+    return violations
 
 
 def _require_platform_labels(path: Path, text: str) -> list[Violation]:
@@ -127,6 +330,9 @@ def check_workflow_text(path: Path, text: str) -> list[Violation]:
                     "wheel workflow must keep manylinux-compatible PyPI wheel settings",
                 )
             )
+
+    if path.name == "ci.yml":
+        violations.extend(_check_ci_structure(path, text))
 
     return violations
 

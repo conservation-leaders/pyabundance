@@ -7,8 +7,9 @@ validation targets.
 Before submitting changes, run:
 
 ```bash
-cargo fmt --all
-cargo test
-cargo clippy --all-targets --all-features -- -D warnings
-pytest -q
+python scripts/check_all.py
 ```
+
+Install the `dev` and `docs` extras first. The command rebuilds the editable native extension,
+then runs the complete Rust, Python, typing, stub-parity, documentation, coverage, and repository
+policy gate used by CI.

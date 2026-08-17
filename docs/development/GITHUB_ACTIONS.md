@@ -60,9 +60,23 @@ Do not use `macos-13`.
 
 Purpose: default Python/Rust quality gate for pushes and pull requests.
 
-Install method: `python -m pip install -e '.[dev,docs,release]'`.
+Install method: `python -m pip install -e '.[dev,docs]'` for the full check and
+`python -m pip install -e '.[dev]'` for compatibility jobs.
 
-Checks: Rust formatting, Rust tests, clippy, Ruff format/lint, mypy, pytest, coverage on Python 3.11, repository hygiene, and GitHub Actions policy.
+The Python 3.11 job invokes the repository-owned gate verbatim:
+
+```bash
+python scripts/check_all.py
+```
+
+That command rebuilds the current editable PyO3 extension and checks Rust formatting/tests/clippy,
+Ruff format/lint, mypy, pytest with coverage, runtime/stub parity, strict MkDocs, repository
+hygiene, and workflow policy. Python 3.12 and 3.13 jobs check typing and tests against those
+interpreters.
+
+The always-running job named `Merge gate` succeeds only when the full check and the complete
+compatibility matrix succeed. Branch protection requires this stable aggregate name rather than
+individual matrix job names.
 
 ### `docs.yml`
 
@@ -112,10 +126,15 @@ Artifacts: generated `reports/`, `benchmark_artifacts/`, and benchmark data are 
 
 ## Sanity check
 
-Run before editing workflow files:
+Run the policy check while editing workflow files:
 
 ```bash
 python scripts/check_github_actions.py
 ```
 
-The check fails if workflows use `maturin develop`, old action versions, upload-artifact v3, token-based PyPI credentials, or local builds in the TestPyPI install workflow.
+The check also prevents removal or weakening of the full-check and aggregate merge-gate topology.
+Before handoff, run the complete repository gate instead:
+
+```bash
+python scripts/check_all.py
+```
