@@ -10,7 +10,7 @@ source, pull requests, releases, and CI; do not duplicate project work in GitHub
 - Project: [Project Goanna - Map Visualisation and pyabundance](https://linear.app/conservation-leaders/project/project-goanna-map-visualisation-and-pyabundance-e7ea0b817b0b)
 - Project ID: `a8785575-89c3-450b-b8c3-4c7eb16e93f5`
 - Current unmarked realignment map:
-  [Decide the behavior-complete clean-room unmarked compatibility surface](https://linear.app/conservation-leaders/issue/ENG-18/decide-the-behavior-complete-clean-room-unmarked-compatibility-surface)
+  [ENG-18 — Decide the behavior-complete clean-room unmarked compatibility surface](https://linear.app/conservation-leaders/issue/ENG-18/decide-the-behavior-complete-clean-room-unmarked-compatibility-surface)
 
 Use the connected Linear tools. If Linear is unavailable or authentication fails, stop and ask the
 user to connect it. Do not fall back to GitHub Issues, local Markdown tickets, or a second Linear
@@ -77,7 +77,7 @@ the final branch name and start it from the default branch as required by `AGENT
 
 - **Map**: use one issue labelled `wayfinder:map`, with Destination, Notes, Decisions so far, Not
   yet specified, and Out of scope in its description. The current realignment map is
-  [Decide the behavior-complete clean-room unmarked compatibility surface](https://linear.app/conservation-leaders/issue/ENG-18/decide-the-behavior-complete-clean-room-unmarked-compatibility-surface).
+  [ENG-18 — Decide the behavior-complete clean-room unmarked compatibility surface](https://linear.app/conservation-leaders/issue/ENG-18/decide-the-behavior-complete-clean-room-unmarked-compatibility-surface).
 - **Child ticket**: create the issue in the same team and project with the map as `parentId`. Apply
   exactly one `wayfinder:<type>` label. Unresolved grilling tickets also carry `ready-for-human`;
   completely specified AFK research and evidence tasks also carry `ready-for-agent`. Native

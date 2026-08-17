@@ -56,7 +56,10 @@ def test_tracker_guide_pins_the_linear_destination_and_map() -> None:
     assert "Project Goanna - Map Visualisation and pyabundance" in tracker
     assert LINEAR_PROJECT_URL in tracker
     assert "/ENG-18/" in tracker
-    assert "Decide the behavior-complete clean-room unmarked compatibility surface" in tracker
+    assert (
+        "[ENG-18 — Decide the behavior-complete clean-room unmarked compatibility surface]"
+        in tracker
+    )
     assert "Do not fall back to GitHub Issues" in tracker
     assert "`get_issue` with relations" in tracker
     assert "`save_issue`" in tracker
