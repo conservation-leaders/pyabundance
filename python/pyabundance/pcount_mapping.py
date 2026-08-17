@@ -170,9 +170,7 @@ def _validate_parameter_blocks(result: PCountResult) -> None:
             )
         expected_start = block.stop
     if expected_start != params.size:
-        raise ValueError(
-            "PCountResult.parameter_blocks must cover the full result.params vector"
-        )
+        raise ValueError("PCountResult.parameter_blocks must cover the full result.params vector")
 
 
 def _as_plain_metadata(mapping: Any) -> dict[str, Any]:
